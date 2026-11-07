@@ -9,7 +9,7 @@ require('dotenv').config({
   path: path.join(__dirname, '..', '.env')
 });
 
-const db = require('./db');
+const { db } = require('./db');
 const app = express();
 
 const PORT = Number(process.env.PORT || 3000);
