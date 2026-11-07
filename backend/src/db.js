@@ -28,6 +28,22 @@ const addColumnIfMissing = async (tableName, columnName, columnType) => {
   }
 };
 
+// ======================================
+// SAFE INSERT (Turso-র জন্য)
+// ======================================
+
+async function safeInsert(sql, args) {
+  try {
+    // args-এর ভেতরে undefined বা null থাকলে সেটাকে null করে দাও
+    const safeArgs = args.map(arg => (arg === undefined ? null : arg));
+    const result = await db.execute({ sql, args: safeArgs });
+    return result;
+  } catch (error) {
+    console.error("Database Insert Error:", error);
+    throw error;
+  }
+}
+
 // পুরো ডেটাবেস সেটআপ রান করার ফাংশন
 async function initDatabase() {
   try {
@@ -224,5 +240,5 @@ async function initDatabase() {
   }
 }
 
-// এক্সপোর্ট করা হচ্ছে (initDatabase ফাংশনটিও এক্সপোর্ট করতে হবে)
-module.exports = { db, initDatabase };
+// এক্সপোর্ট করা হচ্ছে 
+module.exports = { db, initDatabase, safeInsert };
