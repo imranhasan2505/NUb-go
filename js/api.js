@@ -1,5 +1,5 @@
-
-const API_BASE = "/api";
+// Render-এ তোমার ব্যাকএন্ডের লিংক
+const API_BASE = "https://nub-go.onrender.com/api";
 
 export function getToken() {
   return localStorage.getItem("campuspool_token") || "";
