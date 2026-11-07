@@ -229,8 +229,8 @@ app.patch('/api/me/verify', auth, async (req, res) => {
     const cleanExtracted = extracted_text.toUpperCase().replace(/\s/g, '');
     const cleanLoggedId = String(req.user.studentId).replace(/\s/g, '');
 
-    const expectedUnivName = "NORTHERNUNIVERSITY";
-    if (!cleanExtracted.includes(expectedUnivName)) {
+    // লজিক পরিবর্তন: শুধু NORTHERN বা UNIVERSITY যেকোনো একটা পেলেই হবে
+    if (!cleanExtracted.includes("NORTHERN") && !cleanExtracted.includes("UNIVERSITY")) {
       return res.status(400).json({ error: 'Verification Failed: Not a Northern University ID card.' });
     }
 
@@ -334,7 +334,6 @@ app.patch('/api/rides/:id/cancel', auth, async (req, res) => {
     if (ride.owner_id !== req.user.id) return res.status(403).json({ error: 'Only the ride owner can cancel this ride.' });
     if (ride.status !== 'open') return res.status(409).json({ error: 'Only open rides can be cancelled.' });
 
-    // Turso-তে ট্রানজ্যাকশন হ্যান্ডেল করা
     await db.execute(`BEGIN`);
     try {
       const passengersResult = await db.execute({ sql: `SELECT DISTINCT passenger_id FROM bookings WHERE ride_id = ? AND status IN ('pending', 'confirmed')`, args: [rideId] });
