@@ -1459,6 +1459,22 @@ app.use((err, _req, res, _next) => {
   res.status(500).json({ error: 'Unexpected server error.' });
 });
 
-app.listen(PORT, () => {
-  console.log(`CampusPool API ready: http://localhost:${PORT}`);
-});
+// ======================================
+// START SERVER (ONLY AFTER DB IS READY)
+// ======================================
+const startServer = async () => {
+  try {
+    console.log("Initializing Turso Database tables...");
+    // db.js থেকে initDatabase ফাংশনটা কল করতে হবে
+    const { initDatabase } = require('./db');
+    await initDatabase(); 
+    
+    app.listen(PORT, () => {
+      console.log(`CampusPool API ready: http://localhost:${PORT}`);
+    });
+  } catch (error) {
+    console.error("Failed to start server due to database error:", error);
+  }
+};
+
+startServer();
