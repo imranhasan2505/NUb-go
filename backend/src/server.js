@@ -9,7 +9,7 @@ require('dotenv').config({
   path: path.join(__dirname, '..', '.env')
 });
 
-const { db, initDatabase } = require('./db');
+const { db, initDatabase, safeInsert } = require('./db');
 const app = express();
 
 const PORT = Number(process.env.PORT || 3000);
@@ -643,17 +643,10 @@ app.post('/api/bookings/:id/sos', auth, async (req, res) => {
 
     const recipientId = booking.owner_id === req.user.id ? booking.passenger_id : booking.owner_id;
 
-    await db.execute(`BEGIN`);
-    let sosId;
-    try {
-      const result = await db.execute({ sql: `INSERT INTO emergency_alerts (booking_id, triggered_by, latitude, longitude, message) VALUES (?, ?, ?, ?, ?)`, args: [bookingId, req.user.id, latitude, longitude, 'Emergency! I need help.'] });
-      sosId = result.lastInsertRowid;
-      await db.execute({ sql: `INSERT INTO notifications (user_id, type, title, message, booking_id, sos_id) VALUES (?, ?, ?, ?, ?, ?)`, args: [recipientId, 'safety', 'Emergency SOS Alert!', 'A ride participant has sent an emergency alert. Please check their location and contact them immediately.', bookingId, sosId] });
-      await db.execute(`COMMIT`);
-    } catch (e) {
-      await db.execute(`ROLLBACK`);
-      throw e;
-    }
+    const insertResult = await db.execute({ sql: `INSERT INTO emergency_alerts (booking_id, triggered_by, latitude, longitude, message) VALUES (?, ?, ?, ?, ?)`, args: [bookingId, req.user.id, latitude, longitude, 'Emergency! I need help.'] });
+    const sosId = insertResult.lastInsertRowid;
+
+    await db.execute({ sql: `INSERT INTO notifications (user_id, type, title, message, booking_id, sos_id) VALUES (?, ?, ?, ?, ?, ?)`, args: [recipientId, 'safety', 'Emergency SOS Alert!', 'A ride participant has sent an emergency alert. Please check their location and contact them immediately.', bookingId, sosId] });
 
     res.status(201).json({ ok: true, message: 'Emergency SOS alert sent successfully.', sos_id: sosId });
   } catch (error) {
@@ -696,15 +689,8 @@ app.patch('/api/bookings/:id/sos/:sosId/resolve', auth, async (req, res) => {
 
     const recipientId = booking.owner_id === req.user.id ? booking.passenger_id : booking.owner_id;
 
-    await db.execute(`BEGIN`);
-    try {
-      await db.execute({ sql: `UPDATE emergency_alerts SET status = 'resolved', resolved_at = CURRENT_TIMESTAMP WHERE id = ?`, args: [sosId] });
-      await db.execute({ sql: `INSERT INTO notifications (user_id, type, title, message, booking_id, sos_id) VALUES (?, ?, ?, ?, ?, ?)`, args: [recipientId, 'safety', 'SOS Alert Resolved', 'The emergency alert has been marked as resolved.', bookingId, sosId] });
-      await db.execute(`COMMIT`);
-    } catch (e) {
-      await db.execute(`ROLLBACK`);
-      throw e;
-    }
+    await db.execute({ sql: `UPDATE emergency_alerts SET status = 'resolved', resolved_at = CURRENT_TIMESTAMP WHERE id = ?`, args: [sosId] });
+    await db.execute({ sql: `INSERT INTO notifications (user_id, type, title, message, booking_id, sos_id) VALUES (?, ?, ?, ?, ?, ?)`, args: [recipientId, 'safety', 'SOS Alert Resolved', 'The emergency alert has been marked as resolved.', bookingId, sosId] });
 
     res.json({ ok: true, message: 'SOS alert resolved successfully.' });
   } catch (error) {
@@ -722,11 +708,6 @@ app.post('/api/sos/trigger', auth, async (req, res) => {
     const { latitude, longitude, message } = req.body;
     const senderId = req.user.id;
 
-    // ভ্যালুগুলোকে নিশ্চিত করা (null বা undefined যেন না যায়)
-    const safeLat = latitude !== undefined && latitude !== null ? Number(latitude) : null;
-    const safeLng = longitude !== undefined && longitude !== null ? Number(longitude) : null;
-    const safeMsg = message ? String(message) : 'Emergency! I need help.';
-
     // ১. ট্রাস্টেড কন্টাক্ট চেক করা
     const contactsResult = await db.execute({ 
       sql: `SELECT contact_user_id FROM trusted_contacts WHERE user_id = ?`, 
@@ -738,14 +719,13 @@ app.post('/api/sos/trigger', auth, async (req, res) => {
       return res.status(400).json({ error: 'No Trusted Contacts found to alert. Please add a contact first.' });
     }
 
-    // ২. নতুন আলার্ট ইনসার্ট করা
-    const insertResult = await db.execute({ 
-      sql: `INSERT INTO emergency_contact_alerts (sender_id, latitude, longitude, message, status) 
-            VALUES (?, ?, ?, ?, 'active')`, 
-      args: [senderId, safeLat, safeLng, safeMsg] 
-    });
+    // ২. নতুন আলার্ট ইনসার্ট করা (safeInsert ব্যবহার করে)
+    const insertResult = await safeInsert(
+      `INSERT INTO emergency_contact_alerts (sender_id, latitude, longitude, message, status) 
+       VALUES (?, ?, ?, ?, 'active')`,
+      [senderId, latitude, longitude, message || 'Emergency! I need help.']
+    );
     
-    // Turso-তে insert ID বের করার সঠিক উপায়
     const alertId = insertResult.lastInsertRowid;
 
     // ৩. সেন্ডারের নাম বের করা
@@ -757,29 +737,21 @@ app.post('/api/sos/trigger', auth, async (req, res) => {
 
     // ৪. ট্রাস্টেড কন্টাক্টদের নোটিফিকেশন পাঠানো
     for (const contact of contacts) {
-      await db.execute({ 
-        sql: `INSERT INTO notifications (user_id, type, title, message, emergency_alert_id) 
-              VALUES (?, 'safety', '🚨 EMERGENCY SOS ALERT!', ?, ?)`, 
-        args: [
-          contact.contact_user_id, 
-          `${senderName} has pressed the SOS button and needs urgent help!`, 
-          alertId
-        ] 
-      });
+      await safeInsert(
+        `INSERT INTO notifications (user_id, type, title, message, emergency_alert_id) 
+         VALUES (?, 'safety', '🚨 EMERGENCY SOS ALERT!', ?, ?)`,
+        [contact.contact_user_id, `${senderName} has pressed the SOS button and needs urgent help!`, alertId]
+      );
     }
 
     // ৫. অ্যাডমিনদের নোটিফিকেশন পাঠানো
     const adminsResult = await db.execute({ sql: `SELECT id FROM users WHERE role = 'admin'` });
     for (const admin of adminsResult.rows) {
-      await db.execute({ 
-        sql: `INSERT INTO notifications (user_id, type, title, message, emergency_alert_id) 
-              VALUES (?, 'safety', '🚨 EMERGENCY SOS ALERT!', ?, ?)`, 
-        args: [
-          admin.id, 
-          `EMERGENCY: ${senderName} triggered an SOS alert!`, 
-          alertId
-        ] 
-      });
+      await safeInsert(
+        `INSERT INTO notifications (user_id, type, title, message, emergency_alert_id) 
+         VALUES (?, 'safety', '🚨 EMERGENCY SOS ALERT!', ?, ?)`,
+        [admin.id, `EMERGENCY: ${senderName} triggered an SOS alert!`, alertId]
+      );
     }
 
     res.json({ ok: true, message: 'SOS Alert Sent successfully!', alertId });
