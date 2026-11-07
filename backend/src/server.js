@@ -730,14 +730,19 @@ app.post('/api/sos/trigger', auth, async (req, res) => {
       return res.status(400).json({ error: 'No Trusted Contacts found to alert. Please add a contact first.' });
     }
 
-    const alertResult = await db.execute({ sql: `
-      INSERT INTO emergency_contact_alerts (sender_id, latitude, longitude, message, status)
-      VALUES (?, ?, ?, ?, 'active')
-    `, args: [senderId, latitude || null, longitude || null, message || 'Emergency! I need help.'] });
-    const alertId = alertResult.lastInsertRowid;
+    // ১. নতুন আলার্ট ইনসার্ট করা (Turso-র জন্য RETURNING ব্যবহার করা হলো)
+    const alertResult = await db.execute({ 
+      sql: `INSERT INTO emergency_contact_alerts (sender_id, latitude, longitude, message, status) 
+            VALUES (?, ?, ?, ?, 'active') RETURNING id`, 
+      args: [senderId, latitude || null, longitude || null, message || 'Emergency! I need help.'] 
+    });
+    
+    // Turso-র RETURNING থেকে আইডি নেওয়া
+    const alertId = alertResult.rows[0].id;
 
     const senderName = (await db.execute({ sql: `SELECT name FROM users WHERE id = ?`, args: [senderId] })).rows[0].name;
 
+    // ২. ট্রাস্টেড কন্টাক্টদের নোটিফিকেশন পাঠানো
     for (const contact of contacts) {
       await db.execute({ sql: `
         INSERT INTO notifications (user_id, type, title, message, emergency_alert_id)
@@ -745,6 +750,7 @@ app.post('/api/sos/trigger', auth, async (req, res) => {
       `, args: [contact.contact_user_id, `${senderName} has pressed the SOS button and needs urgent help!`, alertId] });
     }
 
+    // ৩. অ্যাডমিনদের নোটিফিকেশন পাঠানো
     const adminsResult = await db.execute({ sql: `SELECT id FROM users WHERE role = 'admin'` });
     for (const admin of adminsResult.rows) {
       await db.execute({ sql: `INSERT INTO notifications (user_id, type, title, message, emergency_alert_id) VALUES (?, 'safety', '🚨 EMERGENCY SOS ALERT!', ?, ?)`, args: [admin.id, `EMERGENCY: ${senderName} triggered an SOS alert!`, alertId] });
