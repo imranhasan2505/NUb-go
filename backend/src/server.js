@@ -9,7 +9,7 @@ require('dotenv').config({
   path: path.join(__dirname, '..', '.env')
 });
 
-const { db } = require('./db');
+const { db, initDatabase } = require('./db');
 const app = express();
 
 const PORT = Number(process.env.PORT || 3000);
@@ -226,10 +226,9 @@ app.patch('/api/me/verify', auth, async (req, res) => {
       return res.status(400).json({ error: 'Missing card image or text.' });
     }
 
-    const cleanExtracted = extracted_text.toUpperCase().replace(/\s/g, '');
-    const cleanLoggedId = String(req.user.studentId).replace(/\s/g, '');
+    const cleanExtracted = String(extracted_text).toUpperCase().replace(/\s/g, '');
+    const cleanLoggedId = String(req.user.studentId || '').replace(/\s/g, '');
 
-    // লজিক পরিবর্তন: শুধু NORTHERN বা UNIVERSITY যেকোনো একটা পেলেই হবে
     if (!cleanExtracted.includes("NORTHERN") && !cleanExtracted.includes("UNIVERSITY")) {
       return res.status(400).json({ error: 'Verification Failed: Not a Northern University ID card.' });
     }
@@ -723,47 +722,70 @@ app.post('/api/sos/trigger', auth, async (req, res) => {
     const { latitude, longitude, message } = req.body;
     const senderId = req.user.id;
 
-    const contactsResult = await db.execute({ sql: `SELECT contact_user_id FROM trusted_contacts WHERE user_id = ?`, args: [senderId] });
+    // ভ্যালুগুলোকে নিশ্চিত করা (null বা undefined যেন না যায়)
+    const safeLat = latitude !== undefined && latitude !== null ? Number(latitude) : null;
+    const safeLng = longitude !== undefined && longitude !== null ? Number(longitude) : null;
+    const safeMsg = message ? String(message) : 'Emergency! I need help.';
+
+    // ১. ট্রাস্টেড কন্টাক্ট চেক করা
+    const contactsResult = await db.execute({ 
+      sql: `SELECT contact_user_id FROM trusted_contacts WHERE user_id = ?`, 
+      args: [senderId] 
+    });
     const contacts = contactsResult.rows;
 
     if (contacts.length === 0) {
       return res.status(400).json({ error: 'No Trusted Contacts found to alert. Please add a contact first.' });
     }
 
-    // ভ্যালুগুলোকে নিশ্চিত করা (null বা undefined যেন না যায়)
-    const safeLat = latitude !== undefined && latitude !== null ? Number(latitude) : null;
-    const safeLng = longitude !== undefined && longitude !== null ? Number(longitude) : null;
-    const safeMsg = message ? String(message) : 'Emergency! I need help.';
-
-    // ১. নতুন আলার্ট ইনসার্ট করা (RETURNING id ব্যবহার করা হলো)
-    const alertResult = await db.execute({ 
+    // ২. নতুন আলার্ট ইনসার্ট করা
+    const insertResult = await db.execute({ 
       sql: `INSERT INTO emergency_contact_alerts (sender_id, latitude, longitude, message, status) 
-            VALUES (?, ?, ?, ?, 'active') RETURNING id`, 
+            VALUES (?, ?, ?, ?, 'active')`, 
       args: [senderId, safeLat, safeLng, safeMsg] 
     });
     
-    const alertId = alertResult.rows[0].id;
+    // Turso-তে insert ID বের করার সঠিক উপায়
+    const alertId = insertResult.lastInsertRowid;
 
-    const senderName = (await db.execute({ sql: `SELECT name FROM users WHERE id = ?`, args: [senderId] })).rows[0].name;
+    // ৩. সেন্ডারের নাম বের করা
+    const senderResult = await db.execute({ 
+      sql: `SELECT name FROM users WHERE id = ?`, 
+      args: [senderId] 
+    });
+    const senderName = senderResult.rows[0]?.name || "A student";
 
-    // ২. ট্রাস্টেড কন্টাক্টদের নোটিফিকেশন পাঠানো
+    // ৪. ট্রাস্টেড কন্টাক্টদের নোটিফিকেশন পাঠানো
     for (const contact of contacts) {
-      await db.execute({ sql: `
-        INSERT INTO notifications (user_id, type, title, message, emergency_alert_id)
-        VALUES (?, 'safety', '🚨 EMERGENCY SOS ALERT!', ?, ?)
-      `, args: [contact.contact_user_id, `${senderName} has pressed the SOS button and needs urgent help!`, alertId] });
+      await db.execute({ 
+        sql: `INSERT INTO notifications (user_id, type, title, message, emergency_alert_id) 
+              VALUES (?, 'safety', '🚨 EMERGENCY SOS ALERT!', ?, ?)`, 
+        args: [
+          contact.contact_user_id, 
+          `${senderName} has pressed the SOS button and needs urgent help!`, 
+          alertId
+        ] 
+      });
     }
 
-    // ৩. অ্যাডমিনদের নোটিফিকেশন পাঠানো
+    // ৫. অ্যাডমিনদের নোটিফিকেশন পাঠানো
     const adminsResult = await db.execute({ sql: `SELECT id FROM users WHERE role = 'admin'` });
     for (const admin of adminsResult.rows) {
-      await db.execute({ sql: `INSERT INTO notifications (user_id, type, title, message, emergency_alert_id) VALUES (?, 'safety', '🚨 EMERGENCY SOS ALERT!', ?, ?)`, args: [admin.id, `EMERGENCY: ${senderName} triggered an SOS alert!`, alertId] });
+      await db.execute({ 
+        sql: `INSERT INTO notifications (user_id, type, title, message, emergency_alert_id) 
+              VALUES (?, 'safety', '🚨 EMERGENCY SOS ALERT!', ?, ?)`, 
+        args: [
+          admin.id, 
+          `EMERGENCY: ${senderName} triggered an SOS alert!`, 
+          alertId
+        ] 
+      });
     }
 
     res.json({ ok: true, message: 'SOS Alert Sent successfully!', alertId });
   } catch (error) {
-    console.error('SOS Trigger Error:', error);
-    res.status(500).json({ error: 'Could not send SOS alert.' });
+    console.error('SOS Trigger Error Details:', error);
+    res.status(500).json({ error: 'Could not send SOS alert. Please try again.' });
   }
 });
 
@@ -1474,8 +1496,6 @@ app.use((err, _req, res, _next) => {
 const startServer = async () => {
   try {
     console.log("Initializing Turso Database tables...");
-    // db.js থেকে initDatabase ফাংশনটা কল করতে হবে
-    const { initDatabase } = require('./db');
     await initDatabase(); 
     
     app.listen(PORT, () => {
