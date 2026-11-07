@@ -142,7 +142,6 @@ export function renderSafety() {
 let sosHoldTimer = null;
 
 async function sendRealSOS() {
-  async function sendRealSOS() {
   toast("Fetching your live location...");
 
   if (!navigator.geolocation) {
@@ -179,43 +178,6 @@ async function sendRealSOS() {
       `);
 
       toast("SOS Alert Sent Successfully!");
-
-    } catch (error) {
-      toast("Failed to send SOS: " + error.message);
-    }
-  }, (error) => {
-    toast("Location access denied. Cannot send Live SOS.");
-  });
-}
-  }
-
-  navigator.geolocation.getCurrentPosition(async (position) => {
-    const lat = position.coords.latitude;
-    const lon = position.coords.longitude;
-
-    try {
-      const response = await apiFetch("/sos/trigger", {
-        method: "POST",
-        body: JSON.stringify({
-          latitude: lat,
-          longitude: lon,
-          message: "EMERGENCY! I need help immediately. This is an automated SOS alert."
-        })
-      });
-
-      // সাকসেস হলে বড় রেড অ্যালার্ট মোডাল দেখাবে
-      openModal(`
-        <div style="text-align:center; padding: 20px;">
-          <h1 style="font-size:60px; margin:0;">🚨</h1>
-          <h2 style="color:#ef4444; font-family:Space Grotesk; margin-top:10px;">SOS ALERT SENT!</h2>
-          <p style="font-size:16px;">Your live location has been sent to all your Trusted Contacts and Admins.</p>
-          <div style="background:rgba(239,68,68,0.1); padding:15px; border-radius:10px; margin:20px 0;">
-            <strong>Latitude:</strong> ${lat.toFixed(6)}<br>
-            <strong>Longitude:</strong> ${lon.toFixed(6)}
-          </div>
-          <button class="btn btn-primary" data-close-modal style="width:100%">I Understand</button>
-        </div>
-      `);
 
     } catch (error) {
       toast("Failed to send SOS: " + error.message);
