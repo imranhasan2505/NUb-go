@@ -191,8 +191,5 @@ async function initDatabase() {
   console.log('CampusPool Turso database migration completed.');
 }
 
-// ডেটাবেস ইনিশিয়ালাইজ করা
-initDatabase().catch(console.error);
-
-// এক্সপোর্ট করা হচ্ছে
-module.exports = db;
+// এক্সপোর্ট করা হচ্ছে (initDatabase ফাংশনটিও এক্সপোর্ট করতে হবে)
+module.exports = { db, initDatabase };
