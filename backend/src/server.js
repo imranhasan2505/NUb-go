@@ -730,14 +730,18 @@ app.post('/api/sos/trigger', auth, async (req, res) => {
       return res.status(400).json({ error: 'No Trusted Contacts found to alert. Please add a contact first.' });
     }
 
-    // ১. নতুন আলার্ট ইনসার্ট করা (Turso-র জন্য RETURNING ব্যবহার করা হলো)
+    // ভ্যালুগুলোকে নিশ্চিত করা (null বা undefined যেন না যায়)
+    const safeLat = latitude !== undefined && latitude !== null ? Number(latitude) : null;
+    const safeLng = longitude !== undefined && longitude !== null ? Number(longitude) : null;
+    const safeMsg = message ? String(message) : 'Emergency! I need help.';
+
+    // ১. নতুন আলার্ট ইনসার্ট করা (RETURNING id ব্যবহার করা হলো)
     const alertResult = await db.execute({ 
       sql: `INSERT INTO emergency_contact_alerts (sender_id, latitude, longitude, message, status) 
             VALUES (?, ?, ?, ?, 'active') RETURNING id`, 
-      args: [senderId, latitude || null, longitude || null, message || 'Emergency! I need help.'] 
+      args: [senderId, safeLat, safeLng, safeMsg] 
     });
     
-    // Turso-র RETURNING থেকে আইডি নেওয়া
     const alertId = alertResult.rows[0].id;
 
     const senderName = (await db.execute({ sql: `SELECT name FROM users WHERE id = ?`, args: [senderId] })).rows[0].name;
