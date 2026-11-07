@@ -1,0 +1,368 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#06131f">
+
+  <title>NUB go — Ride Together, Travel Better</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap"
+    rel="stylesheet"
+  >
+
+  <!-- Main CSS -->
+  <link rel="stylesheet" href="css/base.css">
+
+  <!-- Feature CSS -->
+  <link rel="stylesheet" href="css/features/profile.css">
+  <link rel="stylesheet" href="css/features/rides.css">
+  <link rel="stylesheet" href="css/features/chat.css">
+  <link rel="stylesheet" href="css/features/safety.css">
+  <link rel="stylesheet" href="css/features/impact.css">
+  <link rel="stylesheet" href="css/features/bookings.css">
+  <link rel="stylesheet" href="css/features/fare-split.css">
+  <link rel="stylesheet" href="css/features/admin.css">
+  <link rel="stylesheet" href="css/features/notifications.css">
+  <link rel="stylesheet" href="css/features/recurring.css">
+  <link rel="stylesheet" href="css/features/reviews.css">
+  <link rel="stylesheet" href="css/features/matching.css">
+  <link rel="stylesheet" href="css/features/tracking.css">
+
+  <!-- Leaflet Map CSS & JS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- Global Theme -->
+  <link rel="stylesheet" href="css/theme-overrides.css">
+
+  <!-- Page Specific CSS (Load Last) -->
+  <link rel="stylesheet" href="css/features/auth.css">
+  <link rel="stylesheet" href="css/features/dashboard.css">
+
+
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+</head>
+
+<body>
+
+  <div class="app-shell">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+
+      <!-- BRAND -->
+      <a class="brand" href="#dashboard" aria-label="NUB go home" style="display: flex; align-items: center; gap: 10px;">
+        <img src="nubgologo.png" alt="NUB go Logo" style="height: 40px; width: auto; object-fit: contain;">
+        <span>
+          NUB <span class="brand-accent">go</span>
+          <small>RIDE TOGETHER · TRAVEL BETTER</small>
+        </span>
+      </a>
+
+      <!-- ================= STUDENT SIDEBAR ================= -->
+
+      <div id="student-sidebar-content">
+
+        <div class="sidebar-label">WORKSPACE</div>
+
+        <nav class="main-nav" aria-label="Student navigation">
+
+          <button class="nav-link active" data-view="dashboard">
+            <span>⌂</span> Dashboard
+          </button>
+
+          <button class="nav-link" data-view="find-rides">
+            <span>⌕</span> Find a ride
+          </button>
+
+          <button class="nav-link" data-view="post-ride">
+            <span>＋</span> Post a ride
+          </button>
+
+          <button class="nav-link" data-view="bookings">
+            <span>▤</span> My bookings
+          </button>
+
+          <button class="nav-link" data-view="activities">
+            <span>◷</span> My Activities
+          </button>
+
+          <button class="nav-link" data-view="chat">
+            <span>◌</span>
+            Messages
+            <b
+              class="message-count"
+              id="message-count"
+              hidden
+              aria-label="Unread messages"
+            >0</b>
+          </button>
+
+          <button class="nav-link" data-view="recurring">
+            <span>◷</span> Recurring rides
+          </button>
+
+          <button class="nav-link" data-view="impact">
+            <span>✳</span> Your impact
+          </button>
+
+          <button class="nav-link" data-view="live-tracking">
+            <span>⌖</span> Live trip tracking
+          </button>
+
+        </nav>
+
+        <div class="sidebar-label safety-label">
+          SAFETY & ACCOUNT
+        </div>
+
+        <nav class="main-nav" aria-label="Student safety navigation">
+
+          <button class="nav-link" data-view="female">
+            <span>♡</span> Female-only rides
+          </button>
+
+          <button class="nav-link" data-view="safety">
+            <span>⛨</span> Safety centre
+          </button>
+
+          <button class="nav-link" data-view="profile">
+            <span>◉</span> Profile & reviews
+          </button>
+
+          <button class="nav-link" data-view="notifications">
+            <span>♧</span>
+            Notifications
+            <b class="count" id="sidebar-notification-count" hidden>0</b>
+          </button>
+
+        </nav>
+
+      </div>
+
+      <!-- ================= ADMIN SIDEBAR ================= -->
+
+      <div id="admin-sidebar-content" hidden>
+
+        <div class="sidebar-label">ADMINISTRATION</div>
+
+        <nav class="main-nav" aria-label="Admin navigation">
+
+          <button
+            class="nav-link active"
+            data-view="admin"
+            data-admin-tab="overview"
+          >
+            <span>◫</span> Overview
+          </button>
+
+          <button
+            class="nav-link"
+            data-view="admin"
+            data-admin-tab="users"
+          >
+            <span>♙</span> User Management
+          </button>
+
+          <button
+            class="nav-link"
+            data-view="admin"
+            data-admin-tab="rides"
+          >
+            <span>⌖</span> Ride Management
+          </button>
+
+          <button
+            class="nav-link"
+            data-view="admin"
+            data-admin-tab="bookings"
+          >
+            <span>▤</span> Booking Management
+          </button>
+
+          <button
+            class="nav-link"
+            data-view="admin"
+            data-admin-tab="safety"
+          >
+            <span>⛨</span> SOS & Safety
+          </button>
+
+          <button
+            class="nav-link"
+            data-view="admin"
+            data-admin-tab="logs"
+          >
+            <span>◷</span> Activity Logs
+          </button>
+
+        </nav>
+
+        <div class="sidebar-label safety-label">
+          ADMIN ACCOUNT
+        </div>
+
+        <div class="admin-sidebar-note">
+          <span>✦</span>
+          <div>
+            <strong>NUB go Admin</strong>
+            <small>Equal administrator access</small>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ================= SIDEBAR BOTTOM ================= -->
+
+      <div class="sidebar-bottom">
+
+        <div class="mini-help" id="student-sidebar-help">
+          <span class="help-icon">✦</span>
+          <strong>Better rides start here.</strong>
+          <p>
+            Share a seat. Save money.
+            Make campus life easier.
+          </p>
+        </div>
+
+        <div class="user-mini">
+
+          <div class="avatar" id="sidebar-avatar">NG</div>
+
+          <div>
+            <strong id="sidebar-username">NUB go student</strong>
+            <small id="sidebar-user-meta">Student account</small>
+          </div>
+
+          <button
+            class="icon-button"
+            data-view="profile"
+            aria-label="Open profile"
+            id="sidebar-profile-button"
+          >•••</button>
+
+        </div>
+
+      </div>
+
+    </aside>
+
+    <!-- ================= MAIN CONTENT ================= -->
+
+    <main class="main-content">
+
+      <!-- TOPBAR -->
+      <header class="topbar">
+
+        <!-- মোবাইলের জন্য হ্যামবার্গার মেনু বাটন -->
+        <button class="mobile-menu-btn" data-menu-toggle aria-label="Toggle Menu">
+          ☰
+        </button>
+
+        <div class="mobile-brand" style="display: flex; align-items: center; gap: 8px;">
+          <img src="nubgologo.png" alt="NUB go Logo" style="height: 28px; width: auto;">
+          NUB <span class="brand-accent">go</span>
+        </div>
+
+        <div class="breadcrumb">
+          <span id="breadcrumb-section">Workspace</span>
+          <span class="crumb-slash">/</span>
+          <strong id="page-title">Dashboard</strong>
+        </div>
+
+        <div class="top-actions">
+
+          <label class="global-search" id="global-search-wrapper">
+            <span>⌕</span>
+            <input
+              id="global-search"
+              placeholder="Search rides, routes..."
+              aria-label="Search rides"
+            >
+          </label>
+
+          <!-- MODIFIED: Added dynamic notification badge -->
+          <button
+            class="round-action"
+            data-view="notifications"
+            aria-label="Notifications"
+            id="header-notification-button"
+            style="position: relative;"
+          >
+            ♧
+            <i id="header-notification-badge" style="display:none; position:absolute; top:6px; right:6px; width:8px; height:8px; background-color:#ef4444; border-radius:50%;"></i>
+          </button>
+
+          <div class="top-user">
+
+            <div class="avatar small" id="header-avatar">NG</div>
+
+            <span id="header-username">Student</span>
+
+            <button
+              class="btn btn-secondary btn-small"
+              id="logout-button"
+              type="button"
+              hidden
+            >
+              Log out ↗
+            </button>
+
+          </div>
+
+        </div>
+
+      </header>
+
+      <!-- DYNAMIC PAGE -->
+      <section
+        class="page"
+        id="view-root"
+        aria-live="polite"
+      ></section>
+
+      <!-- FOOTER -->
+      <footer class="footer-note">
+        NUB go · Northern University Bangladesh ride-sharing platform
+        <span>Built for safer, smarter campus travel</span>
+      </footer>
+
+    </main>
+
+  </div>
+
+  <!-- TOAST -->
+  <div
+    class="toast-region"
+    id="toast-region"
+    aria-live="polite"
+  ></div>
+
+  <!-- MODAL -->
+  <dialog id="modal" class="modal">
+
+    <div class="modal-content">
+
+      <button
+        class="modal-close"
+        data-close-modal
+        aria-label="Close"
+      >×</button>
+
+      <div id="modal-body"></div>
+
+    </div>
+
+  </dialog>
+
+  <!-- JAVASCRIPT -->
+  <script type="module" src="js/app.js"></script>
+
+</body>
+</html>

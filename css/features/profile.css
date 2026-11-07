@@ -1,0 +1,465 @@
+
+/* ==========================================
+   CAMPUSPOOL PROFILE PAGE - COMPLETE CSS
+   Facebook Style Profile Design
+========================================== */
+
+/* MAIN PROFILE */
+.cp-profile-page {
+    width: 100%;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 20px;
+    color: var(--text);
+}
+
+/* COVER */
+.cp-cover {
+    width: 100%;
+    height: 250px;
+    position: relative;
+    overflow: hidden;
+    border-radius: 18px 18px 0 0;
+    background: linear-gradient(120deg, #073b4c, #087f75, #13c995);
+}
+
+.cp-cover::before,
+.cp-cover::after {
+    content: "";
+    position: absolute;
+    border: 1px solid rgba(255,255,255,.15);
+    border-radius: 50%;
+}
+
+.cp-cover::before {
+    width: 300px;
+    height: 300px;
+    right: 8%;
+    top: -130px;
+}
+
+.cp-cover::after {
+    width: 220px;
+    height: 220px;
+    right: 25%;
+    bottom: -140px;
+}
+
+/* PROFILE HEADER */
+.cp-profile-header {
+    display: flex;
+    align-items: flex-end;
+    gap: 22px;
+    padding: 0 25px 22px;
+    border-bottom: 1px solid var(--line);
+    flex-wrap: wrap;
+}
+
+.cp-profile-avatar {
+    width: 145px;
+    height: 145px;
+    min-width: 145px;
+    margin-top: -65px;
+    position: relative;
+    z-index: 2;
+    border: 6px solid var(--surface);
+    border-radius: 50%;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #13c995, #087f75);
+    color: white;
+    font-size: 48px;
+    font-weight: 700;
+}
+
+.cp-profile-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.cp-profile-info {
+    flex: 1;
+    min-width: 180px;
+    padding-bottom: 8px;
+}
+
+.cp-profile-info h1 {
+    font: 700 28px 'Space Grotesk', sans-serif;
+    margin: 0 0 7px;
+}
+
+.cp-profile-info p {
+    color: var(--muted);
+    font-size: 13px;
+    margin: 4px 0;
+}
+
+.cp-profile-actions {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+}
+
+.cp-edit-profile-btn {
+    padding: 11px 18px;
+    border: none;
+    border-radius: 10px;
+    background: #13c995;
+    color: #06382e;
+    font-weight: 700;
+    cursor: pointer;
+    transition: .2s;
+}
+
+.cp-edit-profile-btn:hover {
+    background: #49e8ba;
+    transform: translateY(-2px);
+}
+
+/* PROFILE TABS */
+.cp-profile-tabs {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 22px;
+}
+
+.cp-profile-tabs button {
+    padding: 14px 20px;
+    border: none;
+    border-bottom: 3px solid transparent;
+    background: transparent;
+    color: var(--muted);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.cp-profile-tabs button:hover {
+    color: var(--text);
+}
+
+.cp-profile-tabs button.active {
+    color: #13c995;
+    border-bottom-color: #13c995;
+}
+
+/* PROFILE CONTENT */
+.cp-profile-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    align-items: start;
+}
+
+/* CARDS */
+.cp-about-card,
+.cp-verification-card,
+.cp-edit-card {
+    padding: 22px;
+    margin-bottom: 18px;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background: var(--surface);
+}
+
+.cp-about-card h2,
+.cp-verification-card h2,
+.cp-edit-card h2 {
+    font-size: 19px;
+    font-weight: 700;
+    margin: 0 0 18px;
+}
+
+/* ABOUT INFORMATION */
+.cp-about-item {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    padding: 13px 0;
+    border-bottom: 1px solid var(--line);
+}
+
+.cp-about-item:last-child {
+    border-bottom: none;
+}
+
+.cp-about-icon {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    display: grid;
+    place-items: center;
+    border-radius: 12px;
+    background: rgba(19,201,149,.12);
+    color: #13c995;
+    font-size: 18px;
+}
+
+.cp-about-item strong {
+    display: block;
+    font-size: 13px;
+    margin-bottom: 5px;
+}
+
+.cp-about-item small {
+    display: block;
+    color: var(--muted);
+    font-size: 12px;
+    overflow-wrap: anywhere;
+}
+
+/* VERIFICATION CARD */
+.cp-verification-card {
+    background: linear-gradient(
+        120deg,
+        rgba(13,190,143,.10),
+        rgba(22,70,105,.20)
+    );
+}
+
+.cp-progress-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.cp-progress-number {
+    font: 700 34px 'Space Grotesk', sans-serif;
+    color: #13c995;
+}
+
+.cp-progress-track {
+    height: 10px;
+    width: 100%;
+    border-radius: 99px;
+    background: rgba(160,190,210,.15);
+    overflow: hidden;
+    margin: 12px 0;
+}
+
+.cp-progress-track span {
+    display: block;
+    height: 100%;
+    border-radius: 99px;
+    background: linear-gradient(90deg, #13c995, #49e8ba);
+    transition: width .3s ease;
+}
+
+.cp-verification-card p {
+    margin: 10px 0;
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+/* VERIFICATION LIST */
+.cp-verification-list {
+    display: grid;
+    gap: 12px;
+    margin-top: 18px;
+}
+
+.cp-verification-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 13px;
+    border: 1px solid var(--line);
+    border-radius: 13px;
+}
+
+.cp-verification-check {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: rgba(255,190,70,.12);
+    color: #ffcb68;
+    font-weight: 700;
+}
+
+.cp-verification-check.done {
+    background: rgba(25,214,157,.14);
+    color: #22d9a6;
+}
+
+.cp-verification-item div {
+    flex: 1;
+    min-width: 0;
+}
+
+.cp-verification-item strong {
+    display: block;
+    font-size: 13px;
+}
+
+.cp-verification-item small {
+    display: block;
+    color: var(--muted);
+    font-size: 11px;
+    margin-top: 4px;
+}
+
+/* EDIT PROFILE FORM */
+.cp-edit-card {
+    width: 100%;
+}
+
+.cp-edit-form {
+    display: grid;
+    gap: 16px;
+}
+
+.cp-form-group {
+    display: grid;
+    gap: 8px;
+}
+
+.cp-form-group label {
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.cp-form-group input,
+.cp-form-group select,
+.cp-form-group textarea {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    outline: none;
+    background: var(--background);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 13px;
+}
+
+.cp-form-group input:focus,
+.cp-form-group select:focus,
+.cp-form-group textarea:focus {
+    border-color: #13c995;
+    box-shadow: 0 0 0 3px rgba(19,201,149,.10);
+}
+
+.cp-form-group input[type="file"] {
+    max-width: 100%;
+    font-size: 12px;
+    color: var(--muted);
+}
+
+.cp-save-btn {
+    padding: 13px 18px;
+    border: none;
+    border-radius: 10px;
+    background: #13c995;
+    color: #06382e;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.cp-save-btn:hover {
+    background: #49e8ba;
+}
+
+.cp-cancel-btn {
+    padding: 12px 18px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: transparent;
+    color: var(--text);
+    cursor: pointer;
+}
+
+/* EMPTY STATE */
+.cp-empty-state {
+    padding: 35px 20px;
+    text-align: center;
+    border: 1px dashed var(--line);
+    border-radius: 14px;
+    color: var(--muted);
+}
+
+.cp-empty-state p {
+    font-size: 13px;
+}
+
+/* RESPONSIVE TABLET */
+@media (max-width: 768px) {
+    .cp-profile-page {
+        padding: 12px;
+    }
+
+    .cp-cover {
+        height: 170px;
+    }
+
+    .cp-profile-header {
+        padding: 0 15px 18px;
+        gap: 12px;
+    }
+
+    .cp-profile-avatar {
+        width: 110px;
+        height: 110px;
+        min-width: 110px;
+        margin-top: -48px;
+        font-size: 36px;
+    }
+
+    .cp-profile-info h1 {
+        font-size: 22px;
+    }
+
+    .cp-profile-content {
+        grid-template-columns: 1fr;
+    }
+
+    .cp-profile-actions {
+        width: 100%;
+    }
+
+    .cp-edit-profile-btn {
+        width: 100%;
+    }
+
+    .cp-profile-tabs button {
+        padding: 12px 15px;
+    }
+}
+
+/* RESPONSIVE MOBILE */
+@media (max-width: 420px) {
+    .cp-profile-header {
+        align-items: center;
+    }
+
+    .cp-profile-info {
+        flex-basis: 100%;
+    }
+
+    .cp-profile-avatar {
+        width: 95px;
+        height: 95px;
+        min-width: 95px;
+    }
+
+    .cp-about-card,
+    .cp-verification-card,
+    .cp-edit-card {
+        padding: 16px;
+    }
+
+    .cp-progress-number {
+        font-size: 28px;
+    }
+}

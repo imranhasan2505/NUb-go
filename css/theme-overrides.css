@@ -1,0 +1,408 @@
+
+/* =========================================================
+   CAMPUSPOOL — FUTURISTIC THEME OVERRIDES
+   Theme: Dark Navy + Mint Green
+   ========================================================= */
+
+/* -------------------------
+   1. GLOBAL THEME VARIABLES
+-------------------------- */
+
+:root {
+  --bg: #07131d;
+  --panel: #0d202d;
+  --panel-2: #122b3a;
+  --panel-3: #18394a;
+
+  --line: #244455;
+
+  --text: #f1f8f8;
+  --muted: #9bb2bd;
+
+  --green: #75f0c2;
+  --green-2: #25c99a;
+
+  --blue: #73c7ff;
+  --purple: #c0a5ff;
+  --pink: #ff91c8;
+  --red: #ff7474;
+  --amber: #ffc875;
+
+  --radius: 20px;
+  --shadow: 0 18px 50px rgba(0, 0, 0, .24);
+}
+
+/* -------------------------
+   2. BODY BACKGROUND
+-------------------------- */
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background:
+    radial-gradient(
+      circle at 10% 5%,
+      rgba(37, 201, 154, .09),
+      transparent 28%
+    ),
+    radial-gradient(
+      circle at 90% 15%,
+      rgba(115, 199, 255, .07),
+      transparent 25%
+    ),
+    var(--bg);
+
+  color: var(--text);
+}
+
+/* -------------------------
+   3. SIDEBAR
+-------------------------- */
+
+.sidebar {
+  background: rgba(8, 25, 36, .94);
+  border-right: 1px solid rgba(117, 240, 194, .10);
+  backdrop-filter: blur(18px);
+}
+
+.brand-mark {
+  background: linear-gradient(
+    135deg,
+    var(--green),
+    var(--green-2)
+  );
+
+  color: #05251d;
+  box-shadow: 0 0 25px rgba(37, 201, 154, .25);
+}
+
+.nav-link {
+  border: 1px solid transparent;
+  transition:
+    background .2s ease,
+    color .2s ease,
+    border-color .2s ease,
+    transform .2s ease;
+}
+
+.nav-link:hover {
+  background: rgba(117, 240, 194, .08);
+  border-color: rgba(117, 240, 194, .12);
+  color: var(--green);
+  transform: translateX(3px);
+}
+
+.nav-link.active {
+  background: linear-gradient(
+    90deg,
+    rgba(37, 201, 154, .17),
+    rgba(37, 201, 154, .04)
+  );
+
+  color: var(--green);
+  border-color: rgba(117, 240, 194, .20);
+  box-shadow: inset 3px 0 0 var(--green);
+}
+
+/* -------------------------
+   4. TOPBAR
+-------------------------- */
+
+.topbar {
+  background: rgba(7, 19, 29, .78);
+  border-bottom: 1px solid rgba(117, 240, 194, .10);
+  backdrop-filter: blur(16px);
+}
+
+/* -------------------------
+   5. COMMON PANELS
+-------------------------- */
+
+.panel {
+  background: linear-gradient(
+    145deg,
+    rgba(18, 43, 58, .95),
+    rgba(13, 32, 45, .95)
+  );
+
+  border: 1px solid rgba(117, 240, 194, .10);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+
+  transition:
+    transform .18s ease,
+    border-color .18s ease,
+    background .18s ease,
+    box-shadow .18s ease;
+}
+
+.panel:hover {
+  border-color: rgba(117, 240, 194, .22);
+}
+
+/* -------------------------
+   6. BUTTONS
+-------------------------- */
+
+.btn-primary {
+  background: linear-gradient(
+    135deg,
+    var(--green),
+    var(--green-2)
+  );
+
+  color: #05251d;
+  border: none;
+  font-weight: 800;
+
+  box-shadow: 0 8px 24px rgba(37, 201, 154, .18);
+
+  transition:
+    transform .2s ease,
+    box-shadow .2s ease,
+    filter .2s ease;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(37, 201, 154, .28);
+  filter: brightness(1.05);
+}
+
+.btn-secondary {
+  background: rgba(117, 240, 194, .08);
+  border: 1px solid rgba(117, 240, 194, .20);
+  color: var(--green);
+}
+
+.btn-secondary:hover {
+  background: rgba(117, 240, 194, .15);
+  border-color: var(--green);
+}
+
+/* -------------------------
+   7. INPUTS
+-------------------------- */
+
+input,
+select,
+textarea {
+  background: rgba(7, 19, 29, .72);
+  color: var(--text);
+  border-color: var(--line);
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px rgba(117, 240, 194, .10);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #78919d;
+}
+
+/* -------------------------
+   8. DASHBOARD WELCOME
+-------------------------- */
+
+.cp-welcome {
+  position: relative;
+  overflow: hidden;
+
+  border: 1px solid rgba(117, 240, 194, .20);
+  border-radius: 26px;
+
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, .28),
+    0 0 35px rgba(37, 201, 154, .07);
+}
+
+.cp-welcome::after {
+  content: "NUB  /  CAMPUS MOBILITY";
+
+  position: absolute;
+  right: 25px;
+  bottom: 20px;
+
+  color: rgba(255, 255, 255, .65);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 3px;
+
+  pointer-events: none;
+}
+
+/* -------------------------
+   9. DASHBOARD STAT CARDS
+-------------------------- */
+
+.cp-stat {
+  background: linear-gradient(
+    145deg,
+    rgba(18, 43, 58, .96),
+    rgba(10, 29, 42, .96)
+  );
+
+  border: 1px solid rgba(117, 240, 194, .12);
+  border-radius: 20px;
+
+  box-shadow: 0 12px 35px rgba(0, 0, 0, .16);
+
+  transition:
+    transform .2s ease,
+    border-color .2s ease,
+    box-shadow .2s ease;
+}
+
+.cp-stat:hover {
+  transform: translateY(-4px);
+  border-color: rgba(117, 240, 194, .35);
+
+  box-shadow:
+    0 15px 35px rgba(0, 0, 0, .20),
+    0 0 20px rgba(37, 201, 154, .08);
+}
+
+/* -------------------------
+   10. DASHBOARD SHORTCUTS
+-------------------------- */
+
+.cp-shortcut {
+  background: rgba(18, 43, 58, .82);
+  border: 1px solid rgba(117, 240, 194, .12);
+  border-radius: 18px;
+
+  transition:
+    transform .2s ease,
+    background .2s ease,
+    border-color .2s ease;
+}
+
+.cp-shortcut:hover {
+  transform: translateY(-3px);
+  background: rgba(37, 201, 154, .10);
+  border-color: rgba(117, 240, 194, .35);
+}
+
+/* -------------------------
+   11. COMMUNITY CARD
+-------------------------- */
+
+.cp-community-card {
+  background: linear-gradient(
+    135deg,
+    rgba(18, 43, 58, .98),
+    rgba(10, 34, 44, .98)
+  );
+
+  border: 1px solid rgba(117, 240, 194, .14);
+  border-radius: 22px;
+}
+
+/* -------------------------
+   12. NOTIFICATIONS
+-------------------------- */
+
+.notification-item,
+.cp-notification {
+  border-bottom: 1px solid rgba(117, 240, 194, .08);
+}
+
+.notification-item:hover,
+.cp-notification:hover {
+  background: rgba(117, 240, 194, .05);
+}
+
+/* -------------------------
+   13. TOAST
+-------------------------- */
+
+.toast {
+  background: #102b38;
+  color: var(--text);
+  border: 1px solid rgba(117, 240, 194, .22);
+
+  box-shadow: 0 15px 40px rgba(0, 0, 0, .30);
+}
+
+/* -------------------------
+   14. FOOTER
+-------------------------- */
+
+footer,
+.footer {
+  color: var(--muted);
+  border-top: 1px solid rgba(117, 240, 194, .08);
+}
+
+/* -------------------------
+   15. SCROLLBAR
+-------------------------- */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #07131d;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #244455;
+  border-radius: 20px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--green-2);
+}
+
+/* -------------------------
+   16. SELECTION
+-------------------------- */
+
+::selection {
+  background: rgba(117, 240, 194, .30);
+  color: #ffffff;
+}
+
+/* -------------------------
+   17. RESPONSIVE
+-------------------------- */
+
+@media (max-width: 760px) {
+  .cp-welcome::after {
+    display: none;
+  }
+}
+
+@media (max-width: 820px) {
+  .sidebar {
+    background: rgba(8, 25, 36, .98);
+  }
+
+  .topbar {
+    background: rgba(7, 19, 29, .95);
+  }
+}
+
+/* -------------------------
+   18. REDUCED MOTION
+-------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}
