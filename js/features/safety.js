@@ -17,7 +17,8 @@ function getInitials(name = "") {
 
 function renderAvatar(user, size = 48, clickable = false) {
   const name = escapeHTML(user.name || "CampusPool User");
-  const userId = Number(user.id || user.contact_user_id);
+  // এখানে contact_user_id কে প্রাধান্য দেওয়া হলো
+  const userId = Number(user.contact_user_id || user.id);
 
   let avatarHTML = user.profile_picture
     ? `<img src="${escapeHTML(user.profile_picture)}" alt="${name}" style="width:${size}px; height:${size}px; border-radius:50%; object-fit:cover; flex-shrink:0;">`
@@ -30,7 +31,8 @@ function renderAvatar(user, size = 48, clickable = false) {
 }
 
 function profileLink(user, content) {
-  const userId = Number(user.id || user.contact_user_id);
+  // এখানেও contact_user_id কে প্রাধান্য দেওয়া হলো
+  const userId = Number(user.contact_user_id || user.id);
   if (!userId) return content;
   return `<div data-open-student-profile="${userId}" style="cursor:pointer;">${content}</div>`;
 }
