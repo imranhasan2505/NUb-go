@@ -28,22 +28,6 @@ const addColumnIfMissing = async (tableName, columnName, columnType) => {
   }
 };
 
-// ======================================
-// SAFE INSERT (Turso-র জন্য)
-// ======================================
-
-async function safeInsert(sql, args) {
-  try {
-    // args-এর ভেতরে undefined বা null থাকলে সেটাকে null করে দাও
-    const safeArgs = args.map(arg => (arg === undefined ? null : arg));
-    const result = await db.execute({ sql, args: safeArgs });
-    return result;
-  } catch (error) {
-    console.error("Database Insert Error:", error);
-    throw error;
-  }
-}
-
 // পুরো ডেটাবেস সেটআপ রান করার ফাংশন
 async function initDatabase() {
   try {
@@ -117,7 +101,6 @@ async function initDatabase() {
       )
     `);
 
-    // ⚠️ chat_messages টেবিলে read_at কলাম যোগ করা (খুবই জরুরি)
     await addColumnIfMissing('chat_messages', 'read_at', 'TEXT DEFAULT NULL');
 
     await db.execute(`
@@ -181,6 +164,7 @@ async function initDatabase() {
       )
     `);
 
+    // এখানে emergency_alert_id কলামটা সরাসরি টেবিলের ভেতরেই দেওয়া হলো
     await db.execute(`
       CREATE TABLE IF NOT EXISTS notifications (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -190,6 +174,7 @@ async function initDatabase() {
         message TEXT NOT NULL,
         booking_id INTEGER DEFAULT NULL REFERENCES bookings(id) ON DELETE CASCADE,
         sos_id INTEGER DEFAULT NULL REFERENCES emergency_alerts(id) ON DELETE CASCADE,
+        emergency_alert_id INTEGER DEFAULT NULL REFERENCES emergency_contact_alerts(id) ON DELETE CASCADE,
         is_read INTEGER NOT NULL DEFAULT 0,
         created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
       )
@@ -220,8 +205,7 @@ async function initDatabase() {
       VALUES ('NORTHERN UNIVERSITY', '41240302505')
     `);
 
-    // ৬. বাকি মাইগ্রেশনগুলো
-    await addColumnIfMissing('notifications', 'emergency_alert_id', 'INTEGER REFERENCES emergency_contact_alerts(id) ON DELETE CASCADE');
+    // ৬. বাকি মাইগ্রেশনগুলো (এখান থেকে emergency_alert_id বাদ দেওয়া হয়েছে কারণ উপরে টেবিলেই দেওয়া আছে)
     await addColumnIfMissing('emergency_contact_alerts', 'status', "TEXT NOT NULL DEFAULT 'active'");
     await addColumnIfMissing('emergency_contact_alerts', 'resolved_at', 'TEXT DEFAULT NULL');
     await addColumnIfMissing('users', 'role', "TEXT NOT NULL DEFAULT 'student'");
@@ -244,4 +228,4 @@ async function initDatabase() {
 }
 
 // এক্সপোর্ট করা হচ্ছে 
-module.exports = { db, initDatabase, safeInsert };
+module.exports = { db, initDatabase };
