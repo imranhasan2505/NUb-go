@@ -229,12 +229,12 @@ app.patch('/api/me/verify', auth, async (req, res) => {
     const cleanExtracted = String(extracted_text).toUpperCase().replace(/\s/g, '');
     const cleanLoggedId = String(req.user.studentId || '').replace(/\s/g, '');
 
-    if (!cleanExtracted.includes("NORTHERN") && !cleanExtracted.includes("UNIVERSITY")) {
-      return res.status(400).json({ error: 'Verification Failed: Not a Northern University ID card.' });
-    }
+    // সহজ লজিক: ছবিতে NORTHERN থাকলে অথবা স্টুডেন্ট আইডি মিললে ভেরিফাই হবে
+    const hasUnivName = cleanExtracted.includes("NORTHERN");
+    const hasStudentId = cleanExtracted.includes(cleanLoggedId);
 
-    if (!cleanExtracted.includes(cleanLoggedId)) {
-      return res.status(400).json({ error: 'Verification Failed: The Student ID on the card does not match your login ID.' });
+    if (!hasUnivName && !hasStudentId) {
+      return res.status(400).json({ error: 'Verification Failed: Not a Northern University ID card or Student ID mismatch.' });
     }
 
     await db.execute({ sql: `UPDATE users SET is_verified = 1, student_card = ? WHERE id = ?`, args: [student_card, req.user.id] });
@@ -245,7 +245,6 @@ app.patch('/api/me/verify', auth, async (req, res) => {
     res.status(500).json({ error: 'Could not verify user.' });
   }
 });
-
 // ======================================
 // RIDE ROUTES
 // ======================================
