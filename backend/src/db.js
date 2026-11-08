@@ -117,6 +117,9 @@ async function initDatabase() {
       )
     `);
 
+    // ⚠️ chat_messages টেবিলে read_at কলাম যোগ করা (খুবই জরুরি)
+    await addColumnIfMissing('chat_messages', 'read_at', 'TEXT DEFAULT NULL');
+
     await db.execute(`
       CREATE TABLE IF NOT EXISTS live_location_shares (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
