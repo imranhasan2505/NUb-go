@@ -248,12 +248,15 @@ app.patch('/api/admin/reset-password/:requestId', auth, requireAdmin, async (req
 // অ্যাডমিন সব পেন্ডিং রিকোয়েস্ট দেখবে
 app.get('/api/admin/password-reset-requests', auth, requireAdmin, async (req, res) => {
   try {
-    const result = await db.execute({ sql: `
-      SELECT pr.id, pr.student_id, pr.created_at, u.name, u.department
-      FROM password_reset_requests pr JOIN users u ON u.id = pr.user_id
-      WHERE pr.status = 'pending' ORDER BY pr.created_at DESC
-    ` });
-    res.json({ requests: result.rows });
+    const result = await db.execute({ 
+      sql: `
+        SELECT pr.id, pr.student_id, pr.created_at, u.name, u.department
+        FROM password_reset_requests pr JOIN users u ON u.id = pr.user_id
+        WHERE pr.status = 'pending' ORDER BY pr.created_at DESC
+      `,
+      args: [] // <-- এই ফাঁকা অ্যারে যোগ করা হলো
+    });
+    res.json({ requests: result.rows || [] });
   } catch (error) {
     console.error('Admin Password Reset Requests Error:', error);
     res.status(500).json({ error: 'Could not load reset requests.' });
