@@ -84,7 +84,9 @@ async function initDatabase() {
     await addColumnIfMissing('users', 'is_verified', 'INTEGER NOT NULL DEFAULT 0');
     await addColumnIfMissing('users', 'gender', 'TEXT DEFAULT NULL');
     await addColumnIfMissing('users', 'gender_verified', 'INTEGER NOT NULL DEFAULT 0');
-    await addColumnIfMissing('users', 'temp_password', 'TEXT DEFAULT NULL'); // NEW: টেম্পোরারি পাসওয়ার্ড
+    await addColumnIfMissing('users', 'temp_password', 'TEXT DEFAULT NULL');
+    await addColumnIfMissing('users', 'bio', 'TEXT DEFAULT NULL'); // NEW: About Me
+    await addColumnIfMissing('users', 'location', 'TEXT DEFAULT NULL'); // NEW: Location
     
     await addColumnIfMissing('rides', 'total_fare', 'REAL NOT NULL DEFAULT 0');
     await addColumnIfMissing('rides', 'total_passengers', 'INTEGER NOT NULL DEFAULT 3');
@@ -205,7 +207,6 @@ async function initDatabase() {
       VALUES ('NORTHERN UNIVERSITY', '41240302505')
     `);
 
-    // পাসওয়ার্ড রিসেট রিকোয়েস্ট টেবিল
     await db.execute(`
       CREATE TABLE IF NOT EXISTS password_reset_requests (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -223,15 +224,9 @@ async function initDatabase() {
     await addColumnIfMissing('users', 'role', "TEXT NOT NULL DEFAULT 'student'");
     await addColumnIfMissing('users', 'account_status', "TEXT NOT NULL DEFAULT 'active'");
 
-    await db.execute(`
-      UPDATE users SET role = 'admin' WHERE lower(trim(role)) = 'super_admin'
-    `);
-    await db.execute(`
-      UPDATE users SET role = 'student' WHERE role IS NULL OR TRIM(role) = ''
-    `);
-    await db.execute(`
-      UPDATE users SET account_status = 'active' WHERE account_status IS NULL OR TRIM(account_status) = ''
-    `);
+    await db.execute(`UPDATE users SET role = 'admin' WHERE lower(trim(role)) = 'super_admin'`);
+    await db.execute(`UPDATE users SET role = 'student' WHERE role IS NULL OR TRIM(role) = ''`);
+    await db.execute(`UPDATE users SET account_status = 'active' WHERE account_status IS NULL OR TRIM(account_status) = ''`);
 
     console.log('✅ CampusPool Turso database migration completed successfully!');
   } catch (error) {
