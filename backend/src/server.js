@@ -172,9 +172,6 @@ app.post('/api/auth/login', async (req, res) => {
       return res.status(403).json({ error: 'Your CampusPool account is suspended or banned.', account_status: user.account_status });
     }
 
-    // ৫. লগইন সফল হলে temp_password মুছে ফেলা (ঐচ্ছিক)
-    // await db.execute({ sql: `UPDATE users SET temp_password = NULL WHERE id = ?`, args: [user.id] });
-
     res.json({
       token: signToken(user),
       user: { 
@@ -305,6 +302,48 @@ app.patch('/api/me/profile-picture', auth, async (req, res) => {
 
   await db.execute({ sql: `UPDATE users SET profile_picture = ? WHERE id = ?`, args: [picture, req.user.id] });
   res.json({ message: 'Profile picture updated successfully.', profile_picture: picture });
+});
+
+// ======================================
+// CHANGE PASSWORD
+// ======================================
+
+app.patch('/api/me/change-password', auth, async (req, res) => {
+  try {
+    const oldPassword = String(req.body.oldPassword || '');
+    const newPassword = String(req.body.newPassword || '');
+
+    if (!oldPassword || !newPassword) {
+      return res.status(400).json({ error: 'Old password and new password are required.' });
+    }
+    if (newPassword.length < 8) {
+      return res.status(400).json({ error: 'New password must be at least 8 characters.' });
+    }
+    if (oldPassword === newPassword) {
+      return res.status(400).json({ error: 'New password must be different from old password.' });
+    }
+
+    const result = await db.execute({ 
+      sql: `SELECT password_hash FROM users WHERE id = ?`, 
+      args: [req.user.id] 
+    });
+    const user = result.rows[0];
+
+    if (!user || !(await bcrypt.compare(oldPassword, user.password_hash))) {
+      return res.status(401).json({ error: 'Old password is incorrect.' });
+    }
+
+    const newPasswordHash = await bcrypt.hash(newPassword, 12);
+    await db.execute({ 
+      sql: `UPDATE users SET password_hash = ?, temp_password = NULL WHERE id = ?`, 
+      args: [newPasswordHash, req.user.id] 
+    });
+
+    res.json({ ok: true, message: 'Password changed successfully.' });
+  } catch (error) {
+    console.error('Change Password Error:', error);
+    res.status(500).json({ error: 'Could not change password.' });
+  }
 });
 
 // ======================================
