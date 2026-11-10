@@ -84,6 +84,7 @@ async function initDatabase() {
     await addColumnIfMissing('users', 'is_verified', 'INTEGER NOT NULL DEFAULT 0');
     await addColumnIfMissing('users', 'gender', 'TEXT DEFAULT NULL');
     await addColumnIfMissing('users', 'gender_verified', 'INTEGER NOT NULL DEFAULT 0');
+    await addColumnIfMissing('users', 'temp_password', 'TEXT DEFAULT NULL'); // NEW: টেম্পোরারি পাসওয়ার্ড
     
     await addColumnIfMissing('rides', 'total_fare', 'REAL NOT NULL DEFAULT 0');
     await addColumnIfMissing('rides', 'total_passengers', 'INTEGER NOT NULL DEFAULT 3');
@@ -164,7 +165,6 @@ async function initDatabase() {
       )
     `);
 
-    // এখানে emergency_alert_id কলামটা সরাসরি টেবিলের ভেতরেই দেওয়া হলো
     await db.execute(`
       CREATE TABLE IF NOT EXISTS notifications (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -205,9 +205,7 @@ async function initDatabase() {
       VALUES ('NORTHERN UNIVERSITY', '41240302505')
     `);
 
-    // ======================================
-    // NEW: পাসওয়ার্ড রিসেট রিকোয়েস্ট টেবিল
-    // ======================================
+    // পাসওয়ার্ড রিসেট রিকোয়েস্ট টেবিল
     await db.execute(`
       CREATE TABLE IF NOT EXISTS password_reset_requests (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
