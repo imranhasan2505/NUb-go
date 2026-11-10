@@ -13,6 +13,9 @@ const required = [
   ["department", "Department", 20]
 ];
 
+// NEW: Impact data store
+let userImpact = { trips: "—", savings: 0, co2: "—", seats: 0 };
+
 /* =====================================
    HELPERS
 ===================================== */
@@ -172,6 +175,7 @@ async function loadProfileFromBackend() {
   profileLoadStarted = true;
 
   try {
+    // ১. ইউজার প্রোফাইল ডেটা আনা
     const data = await apiFetch("/me");
     const updatedUser = normalizeUser(data);
 
@@ -186,6 +190,19 @@ async function loadProfileFromBackend() {
       "campuspool_department",
       updatedUser.department || ""
     );
+
+    // ২. ড্যাশবোর্ডের ইমপ্যাক্ট ডেটা আনা (নতুন যোগ করা হয়েছে)
+    try {
+      const impactData = await apiFetch("/user/impact");
+      userImpact = {
+        trips: impactData.trips ?? "—",
+        savings: impactData.savings ?? 0,
+        co2: impactData.co2 ?? "—",
+        seats: impactData.seats ?? 0
+      };
+    } catch (impactError) {
+      console.error("Impact data load failed:", impactError);
+    }
 
     const root = document.querySelector("#view-root");
 
@@ -692,28 +709,11 @@ export function renderProfile() {
   const verified =
     user.is_verified === 1 || user.is_verified === true;
 
-  const rideCount =
-    user.total_rides ??
-    user.totalRides ??
-    user.ride_count ??
-    "—";
-
-  const bookingCount =
-    user.total_bookings ??
-    user.totalBookings ??
-    user.booking_count ??
-    "—";
-
-  const rating =
-    user.average_rating ??
-    user.averageRating ??
-    user.rating ??
-    "—";
-
-  const co2 =
-    user.co2_saved ??
-    user.co2Saved ??
-    "—";
+  // NEW: Impact ডেটা থেকে ভ্যালুগুলো নেওয়া হচ্ছে
+  const rideCount = userImpact.trips ?? "—";
+  const bookingCount = userImpact.trips ?? "—"; // ব্যাকএন্ডে আলাদা বুকিং কাউন্ট না থাকায় ট্রিপস দেখানো হচ্ছে
+  const rating = user.average_rating ?? user.rating ?? "—";
+  const co2 = userImpact.co2 ?? "—";
 
   return `
     <div class="cp-profile-page">
