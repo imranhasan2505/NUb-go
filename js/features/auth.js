@@ -324,7 +324,7 @@ function applyMode(mode) {
 
 // Switch between login and registration
 
-document.addEventListener("click", async e =>  {
+document.addEventListener("click", async e => {
   if (e.target.closest("#auth-login-tab")) {
     applyMode("login");
   }
@@ -361,7 +361,11 @@ document.addEventListener("click", async e =>  {
     modal.showModal();
     return;
   }
+});
 
+// Submit events (login, registration, and password reset request)
+
+document.addEventListener("submit", async e => {
   // Reset request form submit
   if (e.target.id === "reset-request-form") {
     e.preventDefault();
@@ -385,11 +389,8 @@ document.addEventListener("click", async e =>  {
     }
     return;
   }
-});
 
-// Login and registration
-
-document.addEventListener("submit", async e => {
+  // Login and registration form submit
   if (e.target.id !== "auth-form") return;
 
   e.preventDefault();
@@ -407,7 +408,6 @@ document.addEventListener("submit", async e => {
     const body = {
       studentId: document.querySelector("#auth-identity").value.trim(),
       password: document.querySelector("#auth-password").value,
-      // লগইনেও ডিপার্টমেন্ট ও জেন্ডার পাঠানো হবে
       department: document.querySelector("#auth-department").value,
       gender: document.querySelector("#auth-gender").value
     };
