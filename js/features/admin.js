@@ -1,4 +1,3 @@
-
 import { state } from "../state.js";
 import { toast } from "../app.js";
 import { apiFetch } from "../api.js";
@@ -17,6 +16,7 @@ const TABS = [
   ["rides", "Rides"],
   ["bookings", "Bookings"],
   ["safety", "Safety Center"],
+  ["resets", "Password Resets"],
   ["logs", "Activity Logs"]
 ];
 
@@ -28,6 +28,7 @@ let users = [];
 let rides = [];
 let bookings = [];
 let alerts = [];
+let resetRequests = [];
 let logs = [];
 
 let pages = {
@@ -68,7 +69,6 @@ const date = value => {
     : d.toLocaleString();
 };
 
-// Use browser-local date components for consistent date keys.
 function localDayKey(d) {
   const year = d.getFullYear();
   const month = String(d.getMonth() + 1).padStart(2, "0");
@@ -1143,9 +1143,6 @@ function heatmap(title, series) {
 function growthHeat(data) {
   const list = Array.isArray(data) ? data : [];
 
-  // Backend already provides daily counts.
-  // Do NOT calculate differences between totals.
-
   return list.map(item => ({
     date: String(item.date || "").slice(0, 10),
     count: Math.max(0, Number(item.total) || 0)
@@ -1706,7 +1703,6 @@ function renderSafety() {
 
   const rows = alerts.map(item => {
 
-    // Backend SOS records use alert_type.
     const independent =
       item.alert_type === "independent" ||
       item.type === "independent" ||
@@ -1785,6 +1781,43 @@ function renderSafety() {
         7
       )}
 
+    </section>
+  `;
+}
+
+/* =========================================================
+   PASSWORD RESETS
+========================================================= */
+
+function renderPasswordResets() {
+  const rows = resetRequests.map(req => `
+    <tr>
+      <td>
+        <strong>${esc(req.name || "Unknown")}</strong>
+        <small>${esc(req.student_id || "—")}</small>
+      </td>
+      <td>${esc(req.department || "—")}</td>
+      <td>${date(req.created_at)}</td>
+      <td>
+        <button class="btn primary" data-reset-password="${req.id}">Reset Password</button>
+      </td>
+    </tr>
+  `).join("");
+
+  return `
+    ${heading(
+      "SECURITY & ACCESS",
+      "Password Reset Requests",
+      "Users who requested a password reset. Resetting will generate a new temporary password.",
+      `<button class="btn" data-refresh>↻ Refresh</button>`
+    )}
+
+    <section class="panel">
+      ${table(
+        ["User", "Department", "Requested On", "Action"],
+        rows,
+        4
+      )}
     </section>
   `;
 }
@@ -1890,7 +1923,7 @@ function content(tab) {
   if (tab==="rides") return renderRides();
   if (tab==="bookings") return renderBookings();
   if (tab==="safety") return renderSafety();
-
+  if (tab==="resets") return renderPasswordResets();
   return renderLogs();
 }
 
@@ -2021,6 +2054,11 @@ async function loadTab(tab) {
       const result = await get(`/admin/sos?${query}`);
 
       alerts = Array.isArray(result.alerts) ? result.alerts : [];
+    }
+
+    else if (tab==="resets") {
+      const result = await get("/admin/password-reset-requests");
+      resetRequests = Array.isArray(result.requests) ? result.requests : [];
     }
 
     else if (tab==="logs") {
@@ -2295,6 +2333,25 @@ document.addEventListener("click",async event => {
     filters.sos = sosFilter.dataset.sosFilter;
 
     loadTab("safety");
+  }
+
+  const resetPassword = target.closest("[data-reset-password]");
+
+  if (resetPassword) {
+    const requestId = Number(resetPassword.dataset.resetPassword);
+    if (!requestId) return;
+
+    if (!confirm("Reset this user's password? A new temporary password will be generated.")) return;
+
+    try {
+      const result = await patch(`/admin/reset-password/${requestId}`);
+      notify(`Password reset! New password: ${result.newPassword}`);
+      await loadTab("resets");
+    } catch (error) {
+      notify(error.message || "Could not reset password.");
+    }
+
+    return;
   }
 });
 
