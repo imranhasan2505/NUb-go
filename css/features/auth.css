@@ -1030,3 +1030,66 @@
   }
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* লগইন পেজে ডিপার্টমেন্ট এবং জেন্ডার সিলেক্টের জন্য */
+#auth-department-wrap,
+#auth-gender-wrap {
+  display: block; /* যাতে লগইনেও দেখা যায় */
+  margin-bottom: 14px;
+}
+
+/* সিলেক্ট বক্সের ডিজাইন */
+#auth-department,
+#auth-gender {
+  width: 100%;
+  padding: 12px 14px;
+  background: #071b29;
+  border: 1px solid #28485c;
+  border-radius: 10px;
+  color: #eef7fb;
+  font-size: 14px;
+  outline: none;
+  appearance: none; /* ডিফল্ট অ্যারো সরানোর জন্য */
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2389a5b6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 16px;
+}
+
+#auth-department:focus,
+#auth-gender:focus {
+  border-color: #19d5a0; /* ফোকাস করলে সবুজ বর্ডার */
+  box-shadow: 0 0 0 2px rgba(25, 213, 160, 0.2);
+}
+
+/* সিলেক্ট বক্সের ভেতরের অপশন */
+#auth-department option,
+#auth-gender option {
+  background: #0a1d2b;
+  color: #eef7fb;
+}
+
