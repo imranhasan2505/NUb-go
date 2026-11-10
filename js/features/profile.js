@@ -64,6 +64,8 @@ function normalizeUser(data) {
     phone1: u.phone1 || "",
     phone2: u.phone2 || "",
     department: u.department || "",
+    bio: u.bio || "", // NEW: Bio
+    location: u.location || "", // NEW: Location
     verification_score:
       u.verification_score ?? u.verificationScore,
     can_book: u.can_book ?? u.canBook,
@@ -243,7 +245,7 @@ function renderCover(user) {
 ===================================== */
 
 function renderAbout(user) {
-  const bio = user.bio || user.about ||
+  const bio = user.bio ||
     "A CampusPool student. Add a short introduction from Edit Profile.";
 
   const interests = Array.isArray(user.interests)
@@ -309,7 +311,7 @@ function renderAbout(user) {
             <span>⌖</span>
             <section>
               <small>Location</small>
-              <strong>${esc(user.location || user.address || "Dhaka, Bangladesh")}</strong>
+              <strong>${esc(user.location || "Not added")}</strong>
             </section>
           </div>
 
@@ -574,6 +576,26 @@ function renderEditForm(user) {
             placeholder="01XXXXXXXXX"
             value="${esc(user.phone2)}"
             required
+          >
+        </label>
+
+        <!-- NEW: About Me (Bio) -->
+        <label>
+          About Me (Bio)
+          <textarea 
+            name="bio" 
+            placeholder="Tell us about yourself" 
+            rows="3"
+          >${esc(user.bio || '')}</textarea>
+        </label>
+
+        <!-- NEW: Location -->
+        <label>
+          Location
+          <input 
+            name="location" 
+            placeholder="e.g. Dhaka, Bangladesh" 
+            value="${esc(user.location || '')}"
           >
         </label>
 
@@ -1118,6 +1140,12 @@ document.addEventListener("submit", async event => {
   const phone2 =
     String(formData.get("phone2") || "").trim();
 
+  const bio = 
+    String(formData.get("bio") || "").trim(); // NEW
+
+  const location = 
+    String(formData.get("location") || "").trim(); // NEW
+
 
   // VALIDATION
 
@@ -1217,7 +1245,11 @@ document.addEventListener("submit", async event => {
 
       phone1,
 
-      phone2
+      phone2,
+
+      bio, // NEW
+
+      location // NEW
 
     };
 
@@ -1340,4 +1372,3 @@ document.addEventListener("submit", async event => {
   }
 
 });
-
