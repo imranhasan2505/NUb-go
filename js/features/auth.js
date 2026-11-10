@@ -339,7 +339,7 @@ document.addEventListener("click", async e => {
     applyMode(switchButton.dataset.authSwitch);
   }
 
-  // Forgot Password ক্লিক
+  // Forgot Password ক্লিক - নতুন ফর্ম
   if (e.target.closest("[data-forgot-password]")) {
     e.preventDefault();
     const modal = document.querySelector("#modal");
@@ -347,45 +347,117 @@ document.addEventListener("click", async e => {
     if (!modal || !modalBody) return;
 
     modalBody.innerHTML = `
-      <h2 style="font-family:Space Grotesk; margin-bottom: 20px;">Reset Password Request</h2>
-      <form id="reset-request-form" class="form-grid">
+      <h2 style="font-family:Space Grotesk; margin-bottom: 10px;">Verify Your Identity</h2>
+      <p style="color:#91a7b5; font-size:12px; margin-bottom:15px;">
+        Enter your account details to verify your identity and get a temporary password.
+      </p>
+      <form id="forgot-password-form" class="form-grid">
         <div class="field field-full">
           <label>Student ID</label>
           <input type="text" name="studentId" placeholder="Enter your Student ID" required>
         </div>
         <div class="field field-full">
-          <button class="btn btn-primary" type="submit" style="width:100%;">Send Reset Request</button>
+          <label>Full Name</label>
+          <input type="text" name="name" placeholder="Enter your full name" required>
+        </div>
+        <div class="field field-full">
+          <label>Phone Number</label>
+          <input type="text" name="phone" placeholder="Enter your phone number" required>
+        </div>
+        <div class="field field-full">
+          <label>Department</label>
+          <select name="department" required>
+            <option value="">Select your department</option>
+            ${[
+              "CSE","EEE","BBA","English","Civil Engineering","Law","Textile Engineering","Pharmacy","Other"
+            ].map(d => `<option value="${d}">${d}</option>`).join("")}
+          </select>
+        </div>
+        <div class="field field-full">
+          <button class="btn btn-primary" type="submit" style="width:100%;">Verify & Get Password</button>
         </div>
       </form>
     `;
     modal.showModal();
     return;
   }
+
+  // Copy Password বাটন
+  if (e.target.closest("#copy-password-btn")) {
+    const btn = e.target.closest("#copy-password-btn");
+    const password = btn.dataset.password;
+    if (!password) return;
+
+    try {
+      await navigator.clipboard.writeText(password);
+      btn.textContent = "✅ Copied!";
+      setTimeout(() => { btn.textContent = "📋 Copy Password"; }, 2000);
+    } catch (err) {
+      toast("Could not copy password. Please copy manually.");
+    }
+    return;
+  }
 });
 
-// Submit events (login, registration, and password reset request)
+// Submit events (login, registration, and forgot password)
 
 document.addEventListener("submit", async e => {
-  // Reset request form submit
-  if (e.target.id === "reset-request-form") {
+  // Forgot Password Form Submit
+  if (e.target.id === "forgot-password-form") {
     e.preventDefault();
     const form = e.target;
     const submitBtn = form.querySelector('button[type="submit"]');
     submitBtn.disabled = true;
-    submitBtn.textContent = "Sending...";
-    
+    submitBtn.textContent = "Verifying...";
+
+    const body = {
+      studentId: form.querySelector('[name="studentId"]').value.trim(),
+      name: form.querySelector('[name="name"]').value.trim(),
+      phone: form.querySelector('[name="phone"]').value.trim(),
+      department: form.querySelector('[name="department"]').value
+    };
+
     try {
-      const result = await apiFetch("/auth/request-password-reset", {
+      const result = await apiFetch("/auth/forgot-password", {
         method: "POST",
-        body: JSON.stringify({ studentId: form.querySelector('[name="studentId"]').value.trim() })
+        body: JSON.stringify(body)
       });
-      toast(result.message || "Request sent to admin.");
-      document.querySelector("#modal")?.close();
+
+      // টেম্পোরারি পাসওয়ার্ড দেখানোর জন্য নতুন মোডাল
+      const modal = document.querySelector("#modal");
+      const modalBody = document.querySelector("#modal-body");
+      
+      if (modal && modalBody) {
+        modalBody.innerHTML = `
+          <div style="text-align:center; padding: 20px;">
+            <h2 style="color:#10b981; margin-bottom: 10px;">✅ Identity Verified</h2>
+            <p style="color:#91a7b5; margin-bottom: 20px;">
+              Use this temporary password to log in, then change it immediately.
+            </p>
+            
+            <div style="background:#102638; border:1px dashed #34d399; border-radius: 10px; padding: 20px; margin-bottom: 20px;">
+              <div style="font-size: 11px; color:#91a7b5; margin-bottom: 5px;">TEMPORARY PASSWORD</div>
+              <div style="font-size: 24px; font-weight: 900; letter-spacing: 1px; color:#fff;">
+                ${result.tempPassword}
+              </div>
+            </div>
+
+            <button class="btn primary" id="copy-password-btn" data-password="${result.tempPassword}" style="width:100%; margin-bottom: 10px;">
+              📋 Copy Password
+            </button>
+            <button class="btn" data-close-modal style="width:100%;">
+              Close & Sign In
+            </button>
+          </div>
+        `;
+        modal.showModal();
+      }
+
     } catch (error) {
       toast(error.message);
     } finally {
       submitBtn.disabled = false;
-      submitBtn.textContent = "Send Reset Request";
+      submitBtn.textContent = "Verify & Get Password";
     }
     return;
   }
