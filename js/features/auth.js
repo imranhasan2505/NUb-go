@@ -1,4 +1,3 @@
-
 import { state } from "../state.js";
 import { toast, navigate } from "../app.js";
 import { apiFetch, setSession } from "../api.js";
@@ -159,7 +158,8 @@ export function renderAuth() {
                 >
               </div>
 
-              <div class="field" id="auth-department-wrap" hidden>
+              <!-- ডিপার্টমেন্ট ফিল্ড এখন লগইনেও দেখা যাবে -->
+              <div class="field" id="auth-department-wrap">
                 <label for="auth-department">Department</label>
 
                 <select id="auth-department">
@@ -178,7 +178,8 @@ export function renderAuth() {
                 </select>
               </div>
 
-              <div class="field" id="auth-gender-wrap" hidden>
+              <!-- জেন্ডার ফিল্ড এখন লগইনেও দেখা যাবে -->
+              <div class="field" id="auth-gender-wrap">
                 <label for="auth-gender">Gender</label>
 
                 <select id="auth-gender">
@@ -279,14 +280,16 @@ function applyMode(mode) {
       : "Sign in to continue your campus journey.";
 
   document.querySelector("#auth-name-wrap").hidden = !reg;
-  document.querySelector("#auth-department-wrap").hidden = !reg;
-  document.querySelector("#auth-gender-wrap").hidden = !reg;
+  // লগইনেও ডিপার্টমেন্ট ও জেন্ডার দেখা যাবে
+  document.querySelector("#auth-department-wrap").hidden = false;
+  document.querySelector("#auth-gender-wrap").hidden = false;
   document.querySelector("#auth-confirm-password-wrap").hidden = !reg;
   document.querySelector("#auth-confirm-password").required = reg;
 
   document.querySelector("#auth-name").required = reg;
-  document.querySelector("#auth-department").required = reg;
-  document.querySelector("#auth-gender").required = reg;
+  // লগইনে ডিপার্টমেন্ট ও জেন্ডার বাধ্যতামূলক
+  document.querySelector("#auth-department").required = true;
+  document.querySelector("#auth-gender").required = true;
 
   document.querySelector("#auth-password").autocomplete =
     reg ? "new-password" : "current-password";
@@ -349,7 +352,10 @@ document.addEventListener("submit", async e => {
   try {
     const body = {
       studentId: document.querySelector("#auth-identity").value.trim(),
-      password: document.querySelector("#auth-password").value
+      password: document.querySelector("#auth-password").value,
+      // লগইনেও ডিপার্টমেন্ট ও জেন্ডার পাঠানো হবে
+      department: document.querySelector("#auth-department").value,
+      gender: document.querySelector("#auth-gender").value
     };
 
     let result;
@@ -362,12 +368,6 @@ document.addEventListener("submit", async e => {
         throw new Error("Passwords do not match.");
       }
       body.name = document.querySelector("#auth-name").value.trim();
-
-      body.department =
-        document.querySelector("#auth-department").value;
-
-      body.gender =
-        document.querySelector("#auth-gender").value;
 
       result = await apiFetch("/auth/register", {
         method: "POST",
@@ -416,5 +416,3 @@ document.addEventListener("submit", async e => {
     }
   }
 });
-
-
