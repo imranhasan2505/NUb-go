@@ -324,7 +324,7 @@ function applyMode(mode) {
 
 // Switch between login and registration
 
-document.addEventListener("click", e => {
+document.addEventListener("click", async e => { {
   if (e.target.closest("#auth-login-tab")) {
     applyMode("login");
   }
