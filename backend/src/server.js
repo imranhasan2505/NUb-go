@@ -146,19 +146,47 @@ app.post('/api/auth/login', async (req, res) => {
   try {
     const studentId = String(req.body.studentId || '').trim();
     const password = String(req.body.password || '');
+    const department = String(req.body.department || '').trim();
+    const gender = String(req.body.gender || '').trim();
+
     const result = await db.execute({ sql: `SELECT * FROM users WHERE student_id = ? COLLATE NOCASE`, args: [studentId] });
     const user = result.rows[0];
 
+    // ১. স্টুডেন্ট আইডি এবং পাসওয়ার্ড চেক
     if (!user || !(await bcrypt.compare(password, user.password_hash))) {
       return res.status(401).json({ error: 'Student ID or password is incorrect.' });
     }
+
+    // ২. ডিপার্টমেন্ট চেক
+    if (department && user.department !== department) {
+      return res.status(401).json({ error: 'Incorrect department.' });
+    }
+
+    // ৩. জেন্ডার চেক
+    if (gender && user.gender !== gender) {
+      return res.status(401).json({ error: 'Incorrect gender.' });
+    }
+
+    // ৪. অ্যাকাউন্ট স্ট্যাটাস চেক
     if (user.account_status !== 'active') {
       return res.status(403).json({ error: 'Your CampusPool account is suspended or banned.', account_status: user.account_status });
     }
 
     res.json({
       token: signToken(user),
-      user: { id: user.id, name: user.name, student_id: user.student_id, department: user.department, university: user.university, profile_picture: user.profile_picture, gender: user.gender, gender_verified: user.gender_verified, role: user.role, account_status: user.account_status, created_at: user.created_at }
+      user: { 
+        id: user.id, 
+        name: user.name, 
+        student_id: user.student_id, 
+        department: user.department, 
+        university: user.university, 
+        profile_picture: user.profile_picture, 
+        gender: user.gender, 
+        gender_verified: user.gender_verified, 
+        role: user.role, 
+        account_status: user.account_status, 
+        created_at: user.created_at 
+      }
     });
   } catch (e) {
     console.error(e);
