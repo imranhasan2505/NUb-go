@@ -459,6 +459,175 @@
         padding: 16px;
     }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   /* =====================================
+   PROFILE EDIT & CHANGE PASSWORD FORM STYLING
+===================================== */
+
+.cp-edit-card {
+  background: linear-gradient(145deg, #0c2030, #091b29);
+  border: 1px solid #1c3b50;
+  border-radius: 16px;
+  padding: 24px;
+  margin-top: 24px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.cp-edit-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #1c3b50;
+  padding-bottom: 15px;
+}
+
+.cp-edit-heading h2 {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 20px;
+  color: #eef7fb;
+  margin: 0 0 5px 0;
+}
+
+.cp-edit-heading p {
+  color: #89a5b6;
+  font-size: 13px;
+  margin: 0;
+}
+
+.cp-edit-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.cp-edit-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #bad0dc;
+}
+
+/* Full width fields for password form */
+#change-password-form {
+  display: grid;
+  grid-template-columns: 1fr; /* এক কলামে সাজানো */
+  gap: 16px;
+}
+
+#change-password-form label {
+  color: #bad0dc;
+}
+
+/* Input & Select Styling */
+.cp-edit-form input,
+.cp-edit-form select {
+  width: 100%;
+  background: #071b29;
+  border: 1px solid #28485c;
+  border-radius: 10px;
+  padding: 12px 14px;
+  color: #eef7fb;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.cp-edit-form input:focus,
+.cp-edit-form select:focus {
+  border-color: #19d5a0;
+  box-shadow: 0 0 0 3px rgba(25, 213, 160, 0.1);
+}
+
+.cp-edit-form input::placeholder {
+  color: #547488;
+}
+
+/* File Input Styling */
+.cp-edit-form input[type="file"] {
+  padding: 8px;
+  background: #0b1d2b;
+  border: 1px dashed #28485c;
+  cursor: pointer;
+}
+
+.cp-edit-form input[type="file"]::file-selector-button {
+  background: #102638;
+  color: #19d5a0;
+  border: 1px solid #28485c;
+  padding: 8px 12px;
+  border-radius: 6px;
+  margin-right: 12px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: 0.2s;
+}
+
+.cp-edit-form input[type="file"]::file-selector-button:hover {
+  background: #153247;
+}
+
+/* Submit Button Styling */
+.cp-primary-btn {
+  grid-column: 1 / -1; /* পুরো প্রস্থ নেবে */
+  background: linear-gradient(120deg, #28e4aa, #0bb98b);
+  color: #04251f;
+  border: none;
+  border-radius: 10px;
+  padding: 14px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: transform 0.15s, filter 0.15s;
+}
+
+.cp-primary-btn:hover {
+  filter: brightness(1.1);
+  transform: translateY(-2px);
+}
+
+.cp-secondary-btn {
+  background: #102638;
+  border: 1px solid #28485c;
+  color: #bad0dc;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.cp-secondary-btn:hover {
+  background: #153247;
+  color: #eef7fb;
+}
+
+/* Responsive adjustments for mobile */
+@media (max-width: 768px) {
+  .cp-edit-form {
+    grid-template-columns: 1fr; /* মোবাইলে এক কলাম */
+  }
+}
+
     .cp-progress-number {
         font-size: 28px;
     }
