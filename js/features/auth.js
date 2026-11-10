@@ -230,6 +230,13 @@ export function renderAuth() {
                 </button>
               </p>
 
+              <!-- Forgot Password বাটন -->
+              <p style="text-align: center; margin-top: -10px; margin-bottom: 15px;">
+                <button type="button" data-forgot-password style="background: none; border: none; color: #19d5a0; cursor: pointer; font-size: 13px; text-decoration: underline;">
+                  Forgot Password?
+                </button>
+              </p>
+
             </form>
 
             <div class="auth-divider">
@@ -330,6 +337,53 @@ document.addEventListener("click", e => {
 
   if (switchButton) {
     applyMode(switchButton.dataset.authSwitch);
+  }
+
+  // Forgot Password ক্লিক
+  if (e.target.closest("[data-forgot-password]")) {
+    e.preventDefault();
+    const modal = document.querySelector("#modal");
+    const modalBody = document.querySelector("#modal-body");
+    if (!modal || !modalBody) return;
+
+    modalBody.innerHTML = `
+      <h2 style="font-family:Space Grotesk; margin-bottom: 20px;">Reset Password Request</h2>
+      <form id="reset-request-form" class="form-grid">
+        <div class="field field-full">
+          <label>Student ID</label>
+          <input type="text" name="studentId" placeholder="Enter your Student ID" required>
+        </div>
+        <div class="field field-full">
+          <button class="btn btn-primary" type="submit" style="width:100%;">Send Reset Request</button>
+        </div>
+      </form>
+    `;
+    modal.showModal();
+    return;
+  }
+
+  // Reset request form submit
+  if (e.target.id === "reset-request-form") {
+    e.preventDefault();
+    const form = e.target;
+    const submitBtn = form.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Sending...";
+    
+    try {
+      const result = await apiFetch("/auth/request-password-reset", {
+        method: "POST",
+        body: JSON.stringify({ studentId: form.querySelector('[name="studentId"]').value.trim() })
+      });
+      toast(result.message || "Request sent to admin.");
+      document.querySelector("#modal")?.close();
+    } catch (error) {
+      toast(error.message);
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Send Reset Request";
+    }
+    return;
   }
 });
 
