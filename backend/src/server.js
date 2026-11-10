@@ -152,22 +152,18 @@ app.post('/api/auth/login', async (req, res) => {
     const result = await db.execute({ sql: `SELECT * FROM users WHERE student_id = ? COLLATE NOCASE`, args: [studentId] });
     const user = result.rows[0];
 
-    // ১. স্টুডেন্ট আইডি এবং পাসওয়ার্ড চেক
     if (!user || !(await bcrypt.compare(password, user.password_hash))) {
       return res.status(401).json({ error: 'Student ID or password is incorrect.' });
     }
 
-    // ২. ডিপার্টমেন্ট চেক
     if (department && user.department !== department) {
       return res.status(401).json({ error: 'Incorrect department.' });
     }
 
-    // ৩. জেন্ডার চেক
     if (gender && user.gender !== gender) {
       return res.status(401).json({ error: 'Incorrect gender.' });
     }
 
-    // ৪. অ্যাকাউন্ট স্ট্যাটাস চেক
     if (user.account_status !== 'active') {
       return res.status(403).json({ error: 'Your CampusPool account is suspended or banned.', account_status: user.account_status });
     }
@@ -195,7 +191,7 @@ app.post('/api/auth/login', async (req, res) => {
 });
 
 // ======================================
-// NEW: FORGOT PASSWORD (USER VERIFIES IDENTITY & GETS TEMP PASSWORD)
+// FORGOT PASSWORD
 // ======================================
 
 app.post('/api/auth/forgot-password', async (req, res) => {
@@ -219,7 +215,6 @@ app.post('/api/auth/forgot-password', async (req, res) => {
       return res.status(404).json({ error: 'No account found with this Student ID.' });
     }
 
-    // তথ্য মিলিয়ে দেখুন
     const nameMatch = user.name.toLowerCase() === name.toLowerCase();
     const departmentMatch = user.department.toLowerCase() === department.toLowerCase();
     const phoneMatch = user.phone1 === phone || user.phone2 === phone;
@@ -228,7 +223,6 @@ app.post('/api/auth/forgot-password', async (req, res) => {
       return res.status(401).json({ error: 'The information provided does not match our records.' });
     }
 
-    // টেম্পোরারি পাসওয়ার্ড তৈরি করুন
     const tempPassword = `CampusPool@${Math.floor(1000 + Math.random() * 9000)}`;
     const passwordHash = await bcrypt.hash(tempPassword, 12);
 
@@ -250,12 +244,12 @@ app.post('/api/auth/forgot-password', async (req, res) => {
 });
 
 // ======================================
-// EXISTING ROUTES (PROFILE, RIDES, etc.)
+// PROFILE & PASSWORD ROUTES
 // ======================================
 
 app.get('/api/me', auth, async (req, res) => {
   const result = await db.execute({ 
-    sql: `SELECT id, name, student_id, department, university, profile_picture, phone1, phone2, student_card, role, account_status, is_verified, temp_password, created_at FROM users WHERE id = ?`, 
+    sql: `SELECT id, name, student_id, department, university, profile_picture, phone1, phone2, student_card, bio, location, role, account_status, is_verified, temp_password, created_at FROM users WHERE id = ?`, 
     args: [req.user.id] 
   });
   const user = result.rows[0];
@@ -271,6 +265,8 @@ app.patch('/api/me/profile', auth, async (req, res) => {
     const department = String(req.body.department || '').trim();
     const phone1 = String(req.body.phone1 || '').trim();
     const phone2 = String(req.body.phone2 || '').trim();
+    const bio = String(req.body.bio || '').trim();
+    const location = String(req.body.location || '').trim();
     const studentCard = req.body.student_card;
 
     if (name.length < 2 || !department) return res.status(400).json({ error: 'Valid name and department are required.' });
@@ -284,9 +280,9 @@ app.patch('/api/me/profile', auth, async (req, res) => {
     }
 
     if (studentCard !== undefined) {
-      await db.execute({ sql: `UPDATE users SET name = ?, department = ?, phone1 = ?, phone2 = ?, student_card = ? WHERE id = ?`, args: [name, department, phone1, phone2, studentCard, req.user.id] });
+      await db.execute({ sql: `UPDATE users SET name = ?, department = ?, phone1 = ?, phone2 = ?, bio = ?, location = ?, student_card = ? WHERE id = ?`, args: [name, department, phone1, phone2, bio, location, studentCard, req.user.id] });
     } else {
-      await db.execute({ sql: `UPDATE users SET name = ?, department = ?, phone1 = ?, phone2 = ? WHERE id = ?`, args: [name, department, phone1, phone2, req.user.id] });
+      await db.execute({ sql: `UPDATE users SET name = ?, department = ?, phone1 = ?, phone2 = ?, bio = ?, location = ? WHERE id = ?`, args: [name, department, phone1, phone2, bio, location, req.user.id] });
     }
     res.json({ ok: true, message: 'Profile information updated successfully.' });
   } catch (error) {
@@ -303,10 +299,6 @@ app.patch('/api/me/profile-picture', auth, async (req, res) => {
   await db.execute({ sql: `UPDATE users SET profile_picture = ? WHERE id = ?`, args: [picture, req.user.id] });
   res.json({ message: 'Profile picture updated successfully.', profile_picture: picture });
 });
-
-// ======================================
-// CHANGE PASSWORD
-// ======================================
 
 app.patch('/api/me/change-password', auth, async (req, res) => {
   try {
