@@ -194,6 +194,76 @@ app.post('/api/auth/login', async (req, res) => {
   }
 });
 
+// ======================================
+// NEW: PASSWORD RESET ROUTES
+// ======================================
+
+// ইউজার পাসওয়ার্ড রিসেট রিকোয়েস্ট পাঠাবে
+app.post('/api/auth/request-password-reset', async (req, res) => {
+  try {
+    const studentId = String(req.body.studentId || '').trim();
+    if (!studentId) return res.status(400).json({ error: 'Student ID is required.' });
+
+    const result = await db.execute({ sql: `SELECT id FROM users WHERE student_id = ? COLLATE NOCASE`, args: [studentId] });
+    const user = result.rows[0];
+    if (!user) return res.status(404).json({ error: 'No account found with this Student ID.' });
+
+    const existing = await db.execute({ sql: `SELECT id FROM password_reset_requests WHERE user_id = ? AND status = 'pending'`, args: [user.id] });
+    if (existing.rows.length > 0) {
+      return res.json({ ok: true, message: 'A reset request is already pending. Please contact the admin.' });
+    }
+
+    await db.execute({ sql: `INSERT INTO password_reset_requests (user_id, student_id) VALUES (?, ?)`, args: [user.id, studentId] });
+    res.json({ ok: true, message: 'Password reset request sent to admin. Please wait for admin to reset your password.' });
+  } catch (error) {
+    console.error('Request Password Reset Error:', error);
+    res.status(500).json({ error: 'Could not send reset request.' });
+  }
+});
+
+// অ্যাডমিন পাসওয়ার্ড রিসেট করবে
+app.patch('/api/admin/reset-password/:requestId', auth, requireAdmin, async (req, res) => {
+  try {
+    const requestId = Number(req.params.requestId);
+    if (!Number.isInteger(requestId) || requestId <= 0) return res.status(400).json({ error: 'Invalid request ID.' });
+
+    const requestResult = await db.execute({ sql: `SELECT * FROM password_reset_requests WHERE id = ? AND status = 'pending'`, args: [requestId] });
+    const request = requestResult.rows[0];
+    if (!request) return res.status(404).json({ error: 'Reset request not found or already resolved.' });
+
+    const newPassword = `CampusPool@${Math.floor(1000 + Math.random() * 9000)}`;
+    const passwordHash = await bcrypt.hash(newPassword, 12);
+
+    await db.execute({ sql: `UPDATE users SET password_hash = ? WHERE id = ?`, args: [passwordHash, request.user_id] });
+    await db.execute({ sql: `UPDATE password_reset_requests SET status = 'resolved', resolved_at = CURRENT_TIMESTAMP WHERE id = ?`, args: [requestId] });
+    await writeAdminLog(req.user.id, request.user_id, 'password_reset', { request_id: requestId, student_id: request.student_id });
+
+    res.json({ ok: true, message: 'Password reset successfully.', newPassword, studentId: request.student_id });
+  } catch (error) {
+    console.error('Admin Reset Password Error:', error);
+    res.status(500).json({ error: 'Could not reset password.' });
+  }
+});
+
+// অ্যাডমিন সব পেন্ডিং রিকোয়েস্ট দেখবে
+app.get('/api/admin/password-reset-requests', auth, requireAdmin, async (req, res) => {
+  try {
+    const result = await db.execute({ sql: `
+      SELECT pr.id, pr.student_id, pr.created_at, u.name, u.department
+      FROM password_reset_requests pr JOIN users u ON u.id = pr.user_id
+      WHERE pr.status = 'pending' ORDER BY pr.created_at DESC
+    ` });
+    res.json({ requests: result.rows });
+  } catch (error) {
+    console.error('Admin Password Reset Requests Error:', error);
+    res.status(500).json({ error: 'Could not load reset requests.' });
+  }
+});
+
+// ======================================
+// EXISTING ROUTES (PROFILE, RIDES, etc.)
+// ======================================
+
 app.get('/api/me', auth, async (req, res) => {
   const result = await db.execute({ sql: `SELECT id, name, student_id, department, university, profile_picture, phone1, phone2, student_card, role, account_status, is_verified, created_at FROM users WHERE id = ?`, args: [req.user.id] });
   const user = result.rows[0];
