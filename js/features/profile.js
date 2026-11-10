@@ -491,6 +491,35 @@ function renderEditForm(user) {
         </button>
 
       </form>
+
+    </div>
+
+    <!-- NEW: Change Password Section -->
+    <div class="cp-edit-card" style="margin-top: 20px;">
+      <div class="cp-edit-heading">
+        <div>
+          <h2>Change Password</h2>
+          <p>Update your password for security.</p>
+        </div>
+      </div>
+
+      <form id="change-password-form" class="cp-edit-form">
+        <label>
+          Old Password
+          <input type="password" name="oldPassword" placeholder="Enter your current password" required>
+        </label>
+        <label>
+          New Password
+          <input type="password" name="newPassword" placeholder="Enter new password (min 8 characters)" minlength="8" required>
+        </label>
+        <label>
+          Confirm New Password
+          <input type="password" name="confirmPassword" placeholder="Confirm new password" minlength="8" required>
+        </label>
+        <button class="cp-primary-btn" type="submit">
+          Update Password
+        </button>
+      </form>
     </div>
   `;
 }
@@ -668,6 +697,41 @@ document.addEventListener("change", async event => {
 ===================================== */
 
 document.addEventListener("submit", async event => {
+  // Change Password Form Submit
+  if (event.target.id === "change-password-form") {
+    event.preventDefault();
+    const form = event.target;
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const oldPassword = form.querySelector('[name="oldPassword"]').value;
+    const newPassword = form.querySelector('[name="newPassword"]').value;
+    const confirmPassword = form.querySelector('[name="confirmPassword"]').value;
+
+    if (newPassword !== confirmPassword) {
+      toast("New passwords do not match.");
+      return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Updating...";
+
+    try {
+      const result = await apiFetch("/me/change-password", {
+        method: "PATCH",
+        body: JSON.stringify({ oldPassword, newPassword })
+      });
+
+      toast(result.message || "Password changed successfully.");
+      form.reset();
+    } catch (error) {
+      toast(error.message);
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Update Password";
+    }
+    return;
+  }
+
+  // Profile Form Submit
   if (event.target.id !== "profile-form") return;
 
   event.preventDefault();
@@ -705,9 +769,6 @@ document.addEventListener("submit", async event => {
 
     let cardData = "";
     
-    // ==========================================
-    // NEW: Tesseract দিয়ে কার্ড ভেরিফিকেশন
-    // ==========================================
     if (cardFile) {
       submitButton.textContent = "Reading Student Card...";
       toast("Reading your ID card... Please wait.");
@@ -717,7 +778,6 @@ document.addEventListener("submit", async event => {
 
       cardData = await readImage(cardFile);
       
-      // সার্ভারে ছবি এবং টেক্সট পাঠানো (সার্ভার চেক করবে এটা আসল কার্ড কিনা)
       await apiFetch("/me/verify", {
         method: "PATCH",
         body: JSON.stringify({ 
@@ -731,7 +791,6 @@ document.addEventListener("submit", async event => {
 
     const photoData = photoFile ? await readImage(photoFile) : "";
 
-    // 1. Update normal profile information.
     const profilePayload = {
       name,
       department,
@@ -748,7 +807,6 @@ document.addEventListener("submit", async event => {
       body: JSON.stringify(profilePayload)
     });
 
-    // 2. Save profile picture to backend.
     if (photoData) {
       await apiFetch("/me/profile-picture", {
         method: "PATCH",
@@ -758,7 +816,6 @@ document.addEventListener("submit", async event => {
       });
     }
 
-    // 3. Fetch latest information from backend.
     const latestData = await apiFetch("/me");
     const updatedUser = normalizeUser(latestData);
 
@@ -767,19 +824,15 @@ document.addEventListener("submit", async event => {
       ...updatedUser
     };
 
-    // Images are NOT saved in localStorage.
-    // Only small text information is cached.
     localStorage.setItem("campuspool_name", name);
     localStorage.setItem("campuspool_department", department);
 
-    // Update header.
     const headerName = document.querySelector("#header-username");
     const sidebarName = document.querySelector("#sidebar-username");
 
     if (headerName) headerName.textContent = name;
     if (sidebarName) sidebarName.textContent = name;
 
-    // Refresh profile screen.
     const root = document.querySelector("#view-root");
 
     if (root) {
