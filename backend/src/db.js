@@ -205,7 +205,21 @@ async function initDatabase() {
       VALUES ('NORTHERN UNIVERSITY', '41240302505')
     `);
 
-    // ৬. বাকি মাইগ্রেশনগুলো (এখান থেকে emergency_alert_id বাদ দেওয়া হয়েছে কারণ উপরে টেবিলেই দেওয়া আছে)
+    // ======================================
+    // NEW: পাসওয়ার্ড রিসেট রিকোয়েস্ট টেবিল
+    // ======================================
+    await db.execute(`
+      CREATE TABLE IF NOT EXISTS password_reset_requests (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        student_id TEXT NOT NULL,
+        status TEXT NOT NULL DEFAULT 'pending' CHECK(status IN ('pending', 'resolved')),
+        created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        resolved_at TEXT DEFAULT NULL
+      )
+    `);
+
+    // ৬. বাকি মাইগ্রেশনগুলো
     await addColumnIfMissing('emergency_contact_alerts', 'status', "TEXT NOT NULL DEFAULT 'active'");
     await addColumnIfMissing('emergency_contact_alerts', 'resolved_at', 'TEXT DEFAULT NULL');
     await addColumnIfMissing('users', 'role', "TEXT NOT NULL DEFAULT 'student'");
