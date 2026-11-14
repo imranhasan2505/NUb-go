@@ -41,6 +41,156 @@
 
   <!-- Tesseract.js for ID card reading -->
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+
+  <!-- Custom Inline Styles for the New Dashboard Layout -->
+  <style>
+    /* --- Latest Updates Section --- */
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        margin-bottom: 20px;
+    }
+
+    .header-text h5, .rides-header h5 {
+        color: #2dd4bf;
+        font-size: 11px;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        margin: 0 0 5px 0;
+        font-weight: 600;
+    }
+
+    .header-text h2, .rides-header h2 {
+        font-size: 24px;
+        margin: 0;
+        font-weight: 600;
+        color: #fff;
+    }
+
+    .view-all {
+        color: #2dd4bf;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 500;
+    }
+
+    .alert-card {
+        background-color: #111c2d;
+        border: 1px solid #1f2f45;
+        border-radius: 12px;
+        padding: 16px 20px;
+        display: flex;
+        align-items: flex-start;
+        margin-bottom: 12px;
+        gap: 16px;
+    }
+
+    .shield-icon {
+        background-color: #133b35;
+        color: #2dd4bf;
+        padding: 10px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .alert-content {
+        flex-grow: 1;
+    }
+
+    .alert-title {
+        font-size: 14px;
+        font-weight: 600;
+        margin: 0 0 4px 0;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        color: #fff;
+    }
+
+    .alert-title span {
+        color: #ef4444; /* Red color for alert */
+    }
+
+    .alert-desc {
+        color: #94a3b8;
+        font-size: 13px;
+        margin: 0 0 8px 0;
+    }
+
+    .alert-time {
+        color: #64748b;
+        font-size: 11px;
+    }
+
+    /* --- Divider --- */
+    .divider {
+        height: 1px;
+        background-color: #1f2f45;
+        margin: 30px 0;
+        border: none;
+    }
+
+    /* --- Rides for You Section --- */
+    .rides-header p {
+        color: #94a3b8;
+        font-size: 13px;
+        margin: 0 0 20px 0;
+    }
+
+    .ride-card {
+        background-color: #111c2d;
+        border: 1px solid #1f2f45;
+        border-radius: 12px;
+        padding: 16px 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 12px;
+        transition: background-color 0.2s;
+        cursor: pointer;
+    }
+
+    .ride-card:hover {
+        background-color: #162338;
+    }
+
+    .ride-info {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .ride-icon {
+        background-color: #1e293b;
+        color: #94a3b8;
+        padding: 10px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .ride-text h4 {
+        font-size: 14px;
+        font-weight: 600;
+        margin: 0 0 4px 0;
+        color: #fff;
+    }
+
+    .ride-text p {
+        color: #94a3b8;
+        font-size: 13px;
+        margin: 0;
+    }
+
+    .arrow {
+        color: #2dd4bf;
+        font-size: 18px;
+    }
+  </style>
 </head>
 
 <body>
@@ -166,7 +316,81 @@
       </header>
 
       <!-- DYNAMIC PAGE -->
-      <section class="page" id="view-root" aria-live="polite"></section>
+      <!-- আমি এখানে ড্যাশবোর্ডের স্ট্যাটিক স্ট্রাকচারটি বসিয়ে দিয়েছি, আপনার JS থেকে ডেটা রেন্ডার করতে পারবেন -->
+      <section class="page" id="view-root" aria-live="polite">
+        
+        <!-- Latest Updates Section -->
+        <div class="section-header">
+            <div class="header-text">
+                <h5>Stay Connected</h5>
+                <h2>Latest updates</h2>
+            </div>
+            <a href="#" class="view-all">View all &rarr;</a>
+        </div>
+
+        <!-- Alert Card 1 -->
+        <div class="alert-card">
+            <div class="shield-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+            </div>
+            <div class="alert-content">
+                <h4 class="alert-title"><span>🚨</span> EMERGENCY SOS ALERT!</h4>
+                <p class="alert-desc">tanmoy ballove has pressed the SOS button and needs urgent help!</p>
+                <div class="alert-time">11/8/2026, 12:22:43 PM</div>
+            </div>
+        </div>
+
+        <!-- Alert Card 2 -->
+        <div class="alert-card">
+            <div class="shield-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+            </div>
+            <div class="alert-content">
+                <h4 class="alert-title"><span>🚨</span> EMERGENCY SOS ALERT!</h4>
+                <p class="alert-desc">tanmoy ballove has pressed the SOS button and needs urgent help!</p>
+                <div class="alert-time">11/8/2026, 12:22:04 PM</div>
+            </div>
+        </div>
+
+        <!-- Divider -->
+        <hr class="divider">
+
+        <!-- Rides for You Section (Replacing Quick Access) -->
+        <div class="rides-header">
+            <h5>Explore Campuspool</h5>
+            <h2>Rides for you</h2>
+            <p>Find your next commute easily.</p>
+        </div>
+
+        <!-- Ride Card 1 -->
+        <div class="ride-card">
+            <div class="ride-info">
+                <div class="ride-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                </div>
+                <div class="ride-text">
+                    <h4>Morning Commute to Campus</h4>
+                    <p>Leaving at 8:00 AM from Downtown</p>
+                </div>
+            </div>
+            <div class="arrow">&rarr;</div>
+        </div>
+
+        <!-- Ride Card 2 -->
+        <div class="ride-card">
+            <div class="ride-info">
+                <div class="ride-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                </div>
+                <div class="ride-text">
+                    <h4>Weekend Trip to City Center</h4>
+                    <p>Leaving at 5:30 PM from Hostel Gate</p>
+                </div>
+            </div>
+            <div class="arrow">&rarr;</div>
+        </div>
+
+      </section>
 
       <!-- FOOTER -->
       <footer class="footer-note">
